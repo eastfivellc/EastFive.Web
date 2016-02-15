@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,9 +32,31 @@ namespace BlackBarLabs.Web.Extensions
                         break;
                     current = taskEnumerator.Current;
                 }
-                result.Add(await current);
+                var currentResult = await current;
+                result.Add(currentResult);
             }
             return result;
+        }
+
+        public static async Task<IEnumerable<Task<T2>>> WhereParallelAsync<T1, T2>(
+            this IEnumerable<T1> items,
+            Func<T1, Task<bool>> condition,
+            Func<T1, Task<T2>> next)
+        {
+            var itemTasks = new ConcurrentBag<Task<T2>>();
+            var iterationTasks = items.Select(item =>
+                PeformWhereCheck(item, condition, next, (resultTask) => itemTasks.Add(resultTask)));
+            await Task.WhenAll(iterationTasks);
+            return itemTasks;
+        }
+
+        private static async Task PeformWhereCheck<T1, T2>(T1 item,
+            Func<T1, Task<bool>> condition,
+            Func<T1, Task<T2>> next,
+            Action<Task<T2>> ifSatisfied)
+        {
+            if (await condition(item))
+                ifSatisfied(next(item));
         }
     }
 }
