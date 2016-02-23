@@ -38,6 +38,32 @@ namespace BlackBarLabs.Web.Extensions
             return result;
         }
 
+        public static async Task WhenAll(this IEnumerable<Task> tasks, int maxParallel)
+        {
+            var lockObject = new object();
+            var taskEnumerator = tasks.GetEnumerator();
+            var pullTasks = Enumerable
+                .Range(0, maxParallel)
+                .Select((i) => PullTasks(taskEnumerator, lockObject));
+
+            await Task.WhenAll(pullTasks);
+        }
+
+        private static async Task PullTasks(IEnumerator<Task> taskEnumerator, object lockObject)
+        {
+            while (true)
+            {
+                Task current;
+                lock (lockObject)
+                {
+                    if (!taskEnumerator.MoveNext())
+                        break;
+                    current = taskEnumerator.Current;
+                }
+                await current;
+            }
+        }
+
         public static async Task<IEnumerable<Task<T2>>> WhereParallelAsync<T1, T2>(
             this IEnumerable<T1> items,
             Func<T1, Task<bool>> condition,
