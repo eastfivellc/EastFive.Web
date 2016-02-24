@@ -93,6 +93,7 @@
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ISendSmsService.cs" />
     <Compile Include="Services\ISendMailService.cs" />
   </ItemGroup>
   <ItemGroup>
