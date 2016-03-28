@@ -11,7 +11,10 @@ namespace BlackBarLabs.Web
         {
             try
             {
-                var securityClientJwtString = header.ToString().Substring(7);
+                var securityClientJwtString = header.ToString();
+                if (securityClientJwtString.Contains("Bearer"))
+                    securityClientJwtString = header.ToString().Substring(7);
+
                 var securityClientJwt = new JwtSecurityToken(securityClientJwtString);
                 var claimsDict = securityClientJwt.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
                 return Guid.Parse(claimsDict[BlackBarLabs.Security.ClaimIds.Authorization]);
