@@ -9,16 +9,26 @@ namespace BlackBarLabs.Web
 {
     public static class HeaderExtensions
     {
+        public static TResult GetAccountId<TResult>(this IEnumerable<System.Security.Claims.Claim> claims,
+            Func<Guid, TResult> success,
+            Func<TResult> authorizationClaimDoesNotExists)
+        {
+            var adminClaim = claims
+                .FirstOrDefault((claim) => String.Compare(claim.Type, BlackBarLabs.Security.ClaimIds.Authorization) == 0);
+
+            if (default(System.Security.Claims.Claim) == adminClaim)
+                return authorizationClaimDoesNotExists();
+
+            var accountId = Guid.Parse(adminClaim.Value);
+            return success(accountId);
+        }
+
         public static Guid GetUserIdFromAuthorizationHeader(this AuthenticationHeaderValue header)
         {
             try
             {
-                var jwtStringPossibleBearer = header.ToString();
-                var securityClientJwtString = jwtStringPossibleBearer.ToLower().StartsWith("bearer ") ?
-                    jwtStringPossibleBearer.Substring(7) :
-                    jwtStringPossibleBearer;
-                var securityClientJwt = new JwtSecurityToken(securityClientJwtString);
-                var claimsDict = securityClientJwt.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
+                var claims = header.GetClaimsFromAuthorizationHeader();
+                var claimsDict = claims.ToDictionary(claim => claim.Type, claim => claim.Value);
                 return Guid.Parse(claimsDict[BlackBarLabs.Security.ClaimIds.Authorization]);
             }
             catch (Exception)
@@ -27,12 +37,11 @@ namespace BlackBarLabs.Web
             }
         }
 
-
-        public static IEnumerable<Claim> GetClaimsFromAuthorizationHeader(this AuthenticationHeaderValue header)
+        public static IEnumerable<Claim> GetClaimsJwtString(this string jwtString)
         {
             try
             {
-                var jwtStringPossibleBearer = header.ToString();
+                var jwtStringPossibleBearer = jwtString;
                 var securityClientJwtString = jwtStringPossibleBearer.ToLower().StartsWith("bearer ") ?
                     jwtStringPossibleBearer.Substring(7) :
                     jwtStringPossibleBearer;
@@ -44,6 +53,11 @@ namespace BlackBarLabs.Web
             {
                 throw new ArgumentException("Problem getting user id from Authorization header");
             }
+        }
+
+        public static IEnumerable<Claim> GetClaimsFromAuthorizationHeader(this AuthenticationHeaderValue header)
+        {
+            return header.ToString().GetClaimsJwtString();
         }
     }
 }
