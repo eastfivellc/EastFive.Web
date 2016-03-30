@@ -57,7 +57,13 @@ namespace BlackBarLabs.Web
 
         public static IEnumerable<Claim> GetClaimsFromAuthorizationHeader(this AuthenticationHeaderValue header)
         {
-            return header.ToString().GetClaimsJwtString();
+            if (default(AuthenticationHeaderValue) == header)
+                yield break;
+            var jwtString = header.ToString();
+            if (String.IsNullOrWhiteSpace(jwtString))
+                yield break;
+            foreach (var claim in jwtString.GetClaimsJwtString())
+                yield return claim;
         }
     }
 }
