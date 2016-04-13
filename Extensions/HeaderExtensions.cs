@@ -23,7 +23,7 @@ namespace BlackBarLabs.Web
             return success(accountId);
         }
 
-        public static Guid GetUserIdFromAuthorizationHeader(this AuthenticationHeaderValue header)
+        public static Guid GetSessionIdFromAuthorizationHeader(this AuthenticationHeaderValue header)
         {
             try
             {
