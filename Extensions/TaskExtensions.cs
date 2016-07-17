@@ -15,7 +15,8 @@ namespace BlackBarLabs.Web.Extensions
             var taskEnumerator = tasks.GetEnumerator();
             var pullTasks = Enumerable
                 .Range(0, maxParallel)
-                .Select((i) => PullTasks(taskEnumerator, lockObject));
+                .Select((i) => PullTasks(taskEnumerator, lockObject))
+                .ToArray();
              
             return (await Task.WhenAll(pullTasks)).SelectMany(task => task);
         }
