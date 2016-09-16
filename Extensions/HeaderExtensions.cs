@@ -88,16 +88,20 @@ namespace BlackBarLabs.Web
             return failed();
         }
 
-        public static IEnumerable<HttpMethod> GetOptions(this HttpResponseHeaders headers)
+        public static IEnumerable<HttpMethod> GetOptions(this HttpContentHeaders headers)
         {
-            IEnumerable<string> optionStrings;
-            headers.TryGetValues("Allow", out optionStrings);
+            var optionStrings = headers.Allow;
             return optionStrings
                 .Where(option => option.ParseHttpMethod((o) => true, () => false))
                 .Select(option => option.ParseHttpMethod(
                     (o) => o, // return parse
                     () => HttpMethod.Get)); // never happens because of Where clause
 
+        }
+
+        public static IEnumerable<HttpMethod> GetOptions(this HttpResponseMessage response)
+        {
+            return response.Content.Headers.GetOptions();
         }
     }
 }
