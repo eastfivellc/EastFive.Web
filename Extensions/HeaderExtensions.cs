@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 
@@ -64,6 +65,39 @@ namespace BlackBarLabs.Web
                 yield break;
             foreach (var claim in jwtString.GetClaimsJwtString())
                 yield return claim;
+        }
+
+        public static TResult ParseHttpMethod<TResult>(this string methodName,
+            Func<HttpMethod, TResult> success,
+            Func<TResult> failed)
+        {
+            if (string.Compare(HttpMethod.Delete.Method, methodName, true) == 0)
+                return success(HttpMethod.Delete);
+            if (string.Compare(HttpMethod.Get.Method, methodName, true) == 0)
+                return success(HttpMethod.Get);
+            if (string.Compare(HttpMethod.Head.Method, methodName, true) == 0)
+                return success(HttpMethod.Head);
+            if (string.Compare(HttpMethod.Options.Method, methodName, true) == 0)
+                return success(HttpMethod.Options);
+            if (string.Compare(HttpMethod.Post.Method, methodName, true) == 0)
+                return success(HttpMethod.Post);
+            if (string.Compare(HttpMethod.Put.Method, methodName, true) == 0)
+                return success(HttpMethod.Put);
+            if (string.Compare(HttpMethod.Trace.Method, methodName, true) == 0)
+                return success(HttpMethod.Trace);
+            return failed();
+        }
+
+        public static IEnumerable<HttpMethod> GetOptions(this HttpResponseHeaders headers)
+        {
+            IEnumerable<string> optionStrings;
+            headers.TryGetValues("Allow", out optionStrings);
+            return optionStrings
+                .Where(option => option.ParseHttpMethod((o) => true, () => false))
+                .Select(option => option.ParseHttpMethod(
+                    (o) => o, // return parse
+                    () => HttpMethod.Get)); // never happens because of Where clause
+
         }
     }
 }
