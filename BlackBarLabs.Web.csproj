@@ -101,6 +101,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\ResourceTypeAttribute.cs" />
     <Compile Include="Exceptions\ResourceCantBeUpdatedException.cs" />
     <Compile Include="Exceptions\ResourceAlreadyExistsException.cs" />
     <Compile Include="Exceptions\ResourceConflictException.cs" />
@@ -108,7 +109,9 @@
     <Compile Include="Extensions\HeaderExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
+    <Compile Include="Extensions\UrnExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResourceQuery.cs" />
     <Compile Include="Services\ITimeService.cs" />
     <Compile Include="Services\IIdentityService.cs" />
     <Compile Include="Services\ISendSmsService.cs" />
@@ -119,6 +122,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BlackBarLabs.Core\BlackBarLabs.Core.csproj">
+      <Project>{73088F1B-3ACA-476B-AA45-B7D6660F1C73}</Project>
+      <Name>BlackBarLabs.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BlackBarLabs.Security\BlackBarLabs.Security.csproj">
       <Project>{17a2e027-c32a-41db-9b46-5222d55c0e26}</Project>
       <Name>BlackBarLabs.Security</Name>
