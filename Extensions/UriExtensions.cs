@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Web;
+using System.Linq;
+using BlackBarLabs.Collections.Generic;
 
 namespace BlackBarLabs.Web
 {
@@ -12,6 +14,17 @@ namespace BlackBarLabs.Web
             query[parameter] = value;
             uriBuilder.Query = query.ToString();
             return uriBuilder.Uri;
+        }
+
+        public static int GetNextParameterIndex(this Uri uri, string parameter)
+        {
+            var linkUriBuilder = new UriBuilder(uri);
+            var linkQuery = HttpUtility.ParseQueryString(linkUriBuilder.Query);
+            var parameters = linkQuery.AllKeys.Where(key => key.ToLower().Contains(parameter + "[")).ToList();
+            var index = 0;
+            if (parameters.Any())
+                index = parameters.Select(param => Convert.ToInt32(param.Substring(parameter.Length + 1, 1))).Max() + 1;
+            return index;
         }
     }
 }
