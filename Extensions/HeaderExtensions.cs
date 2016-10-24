@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using BlackBarLabs.Security.Tokens;
 
 namespace BlackBarLabs.Web
 {
@@ -38,7 +39,9 @@ namespace BlackBarLabs.Web
             }
         }
 
-        public static IEnumerable<Claim> GetClaimsJwtString(this string jwtString)
+        public static IEnumerable<Claim> GetClaimsJwtString(this string jwtString,
+            string issuerConfigSetting = "BlackBarLabs.Web.token-issuer",
+            string validationKeyConfigSetting = "BlackBarLabs.Web.token-issuer-key")
         {
             try
             {
@@ -46,9 +49,25 @@ namespace BlackBarLabs.Web
                 var securityClientJwtString = jwtStringPossibleBearer.ToLower().StartsWith("bearer ") ?
                     jwtStringPossibleBearer.Substring(7) :
                     jwtStringPossibleBearer;
-                var securityClientJwt = new JwtSecurityToken(securityClientJwtString);
-                var claimsDict = securityClientJwt.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
-                return claimsDict.Select(claim => new Claim(claim.Key, claim.Value)).ToList();
+                var result = securityClientJwtString.ParseToken(
+                    (claims) =>
+                    {
+                        return claims;
+                    },
+                    (why) =>
+                    {
+                        return new Claim[] { };
+                    },
+                    (setting) =>
+                    {
+                        return new Claim[] { };
+                    },
+                    (setting, why) =>
+                    {
+                        return new Claim[] { };
+                    },
+                    issuerConfigSetting, validationKeyConfigSetting);
+                return result;
             }
             catch (Exception)
             {
