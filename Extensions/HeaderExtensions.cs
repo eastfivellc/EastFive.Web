@@ -25,48 +25,21 @@ namespace BlackBarLabs.Web
             return success(accountId);
         }
 
-        public static Guid GetAccountIdFromAuthorizationHeader(this AuthenticationHeaderValue header)
+        public static TResult GetAccountIdFromAuthorizationHeader<TResult>(this AuthenticationHeaderValue header,
+            Func<Guid, TResult> success,
+            Func<TResult> authorizationClaimDoesNotExists)
         {
             try
             {
-                var claims = header.GetClaimsFromAuthorizationHeader();
-                var claimsDict = claims.ToDictionary(claim => claim.Type, claim => claim.Value);
-                return Guid.Parse(claimsDict[BlackBarLabs.Security.ClaimIds.Authorization]);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException("Problem getting user id from Authorization header");
-            }
-        }
-
-        public static IEnumerable<Claim> GetClaimsJwtString(this string jwtString,
-            string issuerConfigSetting = "BlackBarLabs.Web.token-issuer",
-            string validationKeyConfigSetting = "BlackBarLabs.Web.token-issuer-key")
-        {
-            try
-            {
-                var jwtStringPossibleBearer = jwtString;
-                var securityClientJwtString = jwtStringPossibleBearer.ToLower().StartsWith("bearer ") ?
-                    jwtStringPossibleBearer.Substring(7) :
-                    jwtStringPossibleBearer;
-                var result = securityClientJwtString.ParseToken(
+                var result = header.GetClaimsFromAuthorizationHeader(
                     (claims) =>
                     {
-                        return claims;
+                        var claimsDict = claims.ToDictionary(claim => claim.Type, claim => claim.Value);
+                        var authId = Guid.Parse(claimsDict[BlackBarLabs.Security.ClaimIds.Authorization]);
+                        return success(authId);
                     },
-                    (why) =>
-                    {
-                        return new Claim[] { };
-                    },
-                    (setting) =>
-                    {
-                        return new Claim[] { };
-                    },
-                    (setting, why) =>
-                    {
-                        return new Claim[] { };
-                    },
-                    issuerConfigSetting, validationKeyConfigSetting);
+                    () => authorizationClaimDoesNotExists(),
+                    (why) => authorizationClaimDoesNotExists());
                 return result;
             }
             catch (Exception)
@@ -75,15 +48,60 @@ namespace BlackBarLabs.Web
             }
         }
 
-        public static IEnumerable<Claim> GetClaimsFromAuthorizationHeader(this AuthenticationHeaderValue header)
+        private const string BearerTokenPrefix = "bearer ";
+
+        public static TResult GetClaimsJwtString<TResult>(this string jwtString,
+            Func<IEnumerable<Claim>, TResult> success,
+            Func<string, TResult> failure,
+            string issuerConfigSetting = "BlackBarLabs.Web.token-issuer",
+            string validationKeyConfigSetting = "BlackBarLabs.Web.token-issuer-key")
+        {
+            try
+            {
+                var jwtStringPossibleBearer = jwtString;
+                var securityClientJwtString = jwtStringPossibleBearer.ToLower().StartsWith(BearerTokenPrefix) ?
+                    jwtStringPossibleBearer.Substring(BearerTokenPrefix.Length) :
+                    jwtStringPossibleBearer;
+                var result = securityClientJwtString.ParseToken(
+                    (claims) =>
+                    {
+                        return success(claims);
+                    },
+                    (why) =>
+                    {
+                        return failure(why);
+                    },
+                    (setting) =>
+                    {
+                        return failure($"Missing config setting [{setting}]");
+                    },
+                    (setting, why) =>
+                    {
+                        return failure($"Invalid config setting[{setting}]:{why}");
+                    },
+                    issuerConfigSetting, validationKeyConfigSetting);
+                return result;
+            }
+            catch (Exception)
+            {
+                //throw new ArgumentException("Problem getting user id from Authorization header");
+                throw;
+            }
+        }
+
+        public static TResult GetClaimsFromAuthorizationHeader<TResult>(this AuthenticationHeaderValue header,
+            Func<IEnumerable<Claim>, TResult> success,
+            Func<TResult> authorizationNotSet,
+            Func<string, TResult> failure,
+            string issuerConfigSetting = "BlackBarLabs.Web.token-issuer",
+            string validationKeyConfigSetting = "BlackBarLabs.Web.token-issuer-key")
         {
             if (default(AuthenticationHeaderValue) == header)
-                yield break;
+                return authorizationNotSet();
             var jwtString = header.ToString();
             if (String.IsNullOrWhiteSpace(jwtString))
-                yield break;
-            foreach (var claim in jwtString.GetClaimsJwtString())
-                yield return claim;
+                return authorizationNotSet();
+            return jwtString.GetClaimsJwtString(success, failure);
         }
 
         public static TResult ParseHttpMethod<TResult>(this string methodName,
