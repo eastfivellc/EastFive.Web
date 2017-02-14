@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using BlackBarLabs.Security.Tokens;
+using System.Configuration;
 
 namespace BlackBarLabs.Web
 {
@@ -23,29 +24,6 @@ namespace BlackBarLabs.Web
 
             var accountId = Guid.Parse(adminClaim.Value);
             return success(accountId);
-        }
-
-        public static TResult GetAccountIdFromAuthorizationHeader<TResult>(this AuthenticationHeaderValue header,
-            Func<Guid, TResult> success,
-            Func<TResult> authorizationClaimDoesNotExists)
-        {
-            try
-            {
-                var result = header.GetClaimsFromAuthorizationHeader(
-                    (claims) =>
-                    {
-                        var claimsDict = claims.ToDictionary(claim => claim.Type, claim => claim.Value);
-                        var authId = Guid.Parse(claimsDict[BlackBarLabs.Security.ClaimIds.Authorization]);
-                        return success(authId);
-                    },
-                    () => authorizationClaimDoesNotExists(),
-                    (why) => authorizationClaimDoesNotExists());
-                return result;
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException("Problem getting user id from Authorization header");
-            }
         }
 
         private const string BearerTokenPrefix = "bearer ";
@@ -87,21 +65,6 @@ namespace BlackBarLabs.Web
                 //throw new ArgumentException("Problem getting user id from Authorization header");
                 throw;
             }
-        }
-
-        public static TResult GetClaimsFromAuthorizationHeader<TResult>(this AuthenticationHeaderValue header,
-            Func<IEnumerable<Claim>, TResult> success,
-            Func<TResult> authorizationNotSet,
-            Func<string, TResult> failure,
-            string issuerConfigSetting = "BlackBarLabs.Web.token-issuer",
-            string validationKeyConfigSetting = "BlackBarLabs.Web.token-issuer-key")
-        {
-            if (default(AuthenticationHeaderValue) == header)
-                return authorizationNotSet();
-            var jwtString = header.ToString();
-            if (String.IsNullOrWhiteSpace(jwtString))
-                return authorizationNotSet();
-            return jwtString.GetClaimsJwtString(success, failure);
         }
 
         public static TResult ParseHttpMethod<TResult>(this string methodName,
