@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\ResourceTypeAttribute.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="Exceptions\ResourceCantBeUpdatedException.cs" />
     <Compile Include="Exceptions\ResourceAlreadyExistsException.cs" />
     <Compile Include="Exceptions\ResourceConflictException.cs" />
