@@ -31,8 +31,8 @@ namespace BlackBarLabs.Web
         public static TResult GetClaimsJwtString<TResult>(this string jwtString,
             Func<IEnumerable<Claim>, TResult> success,
             Func<string, TResult> failure,
-            string issuerConfigSetting = "BlackBarLabs.Web.token-issuer",
-            string validationKeyConfigSetting = "BlackBarLabs.Web.token-issuer-key")
+            string issuerConfigSetting = EastFive.Security.AppSettings.TokenIssuer,
+            string validationKeyConfigSetting = EastFive.Security.AppSettings.TokenKey)
         {
             try
             {

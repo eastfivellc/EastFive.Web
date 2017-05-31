@@ -12,5 +12,10 @@ namespace EastFive.Web.Configuration
         {
             return Microsoft.Azure.CloudConfigurationManager.GetSetting(key);
         }
+
+        public static Uri GetUri(string key)
+        {
+            return new Uri(Get(key));
+        }
     }
 }
