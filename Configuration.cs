@@ -48,12 +48,25 @@ namespace EastFive.Web.Configuration
         {
             try
             {
-                var keyValue = Microsoft.Azure.CloudConfigurationManager.GetSetting(key, false, true);
+                //var keyValue = Microsoft.Azure.CloudConfigurationManager.GetSetting(key, false, true);
+                var keyValue = System.Configuration.ConfigurationManager.AppSettings[key];
                 return onFound(keyValue);
-            } catch(Exception)
+            } catch(Exception ex)
             {
                 return onUnspecified($"The configuration value for [{key}] is not specified. Please specify a string value");
             }
+        }
+
+        public static TResult GetGuid<TResult>(string key,
+            Func<Guid, TResult> onParsed,
+            Func<string, TResult> unspecifiedOrInvalid)
+        {
+            var keyValue = Get(key);
+            Guid guidValue;
+            if (!Guid.TryParse(keyValue, out guidValue))
+                return unspecifiedOrInvalid(
+                    $"The configuration value for [{key}] is not specified. Please specify a Guid value");
+            return onParsed(guidValue);
         }
     }
 }
