@@ -68,5 +68,25 @@ namespace EastFive.Web.Configuration
                     $"The configuration value for [{key}] is not specified. Please specify a Guid value");
             return onParsed(guidValue);
         }
+
+        public static TResult GetBase64Bytes<TResult>(string key,
+            Func<byte [], TResult> onParsed,
+            Func<string, TResult> unspecifiedOrInvalid)
+        {
+            return GetString(key,
+                keyValue =>
+                {
+                    try
+                    {
+                        var bytes = Convert.FromBase64String(keyValue);
+                        return onParsed(bytes);
+                    }
+                    catch (Exception ex)
+                    {
+                        return unspecifiedOrInvalid($"Invalid base64 configuration value for [{key}]: {ex.Message}");
+                    }
+                },
+                (whyString) => unspecifiedOrInvalid($"The configuration value for [{key}] is not specified. Please specify a Base64 value"));
+        }
     }
 }
