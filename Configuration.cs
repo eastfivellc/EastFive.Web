@@ -61,12 +61,16 @@ namespace EastFive.Web.Configuration
             Func<Guid, TResult> onParsed,
             Func<string, TResult> unspecifiedOrInvalid)
         {
-            var keyValue = Get(key);
-            Guid guidValue;
-            if (!Guid.TryParse(keyValue, out guidValue))
-                return unspecifiedOrInvalid(
-                    $"The configuration value for [{key}] is not specified. Please specify a Guid value");
-            return onParsed(guidValue);
+            return GetString(key,
+                (keyValue) =>
+                {
+                    Guid guidValue;
+                    if (!Guid.TryParse(keyValue, out guidValue))
+                        return unspecifiedOrInvalid(
+                            $"The configuration value for [{key}] is not in the correct format. Please specify a Guid value");
+                    return onParsed(guidValue);
+                },
+                unspecifiedOrInvalid);
         }
 
         public static TResult GetBase64Bytes<TResult>(string key,
