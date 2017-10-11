@@ -53,6 +53,7 @@ namespace EastFive.Web.Configuration
                 return onFound(keyValue);
             } catch(Exception ex)
             {
+                var exceptionType = ex.GetType();
                 return onUnspecified($"The configuration value for [{key}] is not specified. Please specify a string value");
             }
         }
