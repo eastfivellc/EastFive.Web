@@ -96,7 +96,7 @@ namespace BlackBarLabs.Web
 
                 return onFound(secrets.ToDictionary());
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return onKeyVaultTokenInvalid();
             }
@@ -118,7 +118,7 @@ namespace BlackBarLabs.Web
 
                 return onFound(secretBundle.Value);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return onKeyVaultTokenInvalid();
             }
