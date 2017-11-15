@@ -140,6 +140,7 @@
     <Compile Include="Extensions\WebRequestExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceQuery.cs" />
+    <Compile Include="Settings\ConfigAttribute.cs" />
     <Compile Include="Settings\Constants.cs" />
   </ItemGroup>
   <ItemGroup>
