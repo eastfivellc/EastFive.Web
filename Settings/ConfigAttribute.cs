@@ -44,6 +44,16 @@ namespace EastFive.Web
         /// Not overriding this value in a deployment is a security concern
         /// </summary>
         public virtual bool DeploymentSecurityConcern { get; set; }
+
+        /// <summary>
+        /// This value should not be stored in a version control repository or anything other location
+        /// that is publicly available.
+        /// </summary>
+        /// <remarks>
+        /// These values are generally placed in a (App|Web).{Env}.config file that is flagged
+        /// as ignored (i.e. .gitignore file) by the source control system.
+        /// </remarks>
+        public virtual bool PrivateRepositoryOnly { get; set; }
     }
 
     public enum DeploymentOverrides

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using EastFive.Web.Configuration;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using EastFive.Collections.Generic;
 
 namespace BlackBarLabs.Web
 {

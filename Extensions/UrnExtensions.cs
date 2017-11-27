@@ -5,8 +5,10 @@ using System.Reflection;
 
 using BlackBarLabs;
 using BlackBarLabs.Collections.Generic;
+using EastFive.Collections.Generic;
+using BlackBarLabs.Web;
 
-namespace BlackBarLabs.Web
+namespace EastFive.Web
 {
     public static class UrnExtensions
     {
