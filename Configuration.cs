@@ -8,54 +8,52 @@ namespace EastFive.Web.Configuration
 {
     public static class Settings
     {
+        [Obsolete]
         public static string Get(string key)
         {
             return Microsoft.Azure.CloudConfigurationManager.GetSetting(key);
         }
-
-        [Obsolete]
-        public static Uri GetUri(string key)
+        
+        public static TResult GetString<TResult>(string key,
+            Func<string, TResult> onFound,
+            Func<string, TResult> onUnspecified)
         {
-            return new Uri(Get(key));
+                //var keyValue = Microsoft.Azure.CloudConfigurationManager.GetSetting(key, false, true);
+                //var keyValue = System.Configuration.ConfigurationManager.AppSettings[key];
+                if (!BlackBarLabs.Web.ConfigurationContext.Instance.AppSettings.ContainsKey(key))
+                    return onUnspecified($"Z - The configuration value for [{key}] is not specified. Please specify a string value");
+
+                var keyValue = BlackBarLabs.Web.ConfigurationContext.Instance.AppSettings[key];
+                return onFound(keyValue);
         }
 
         public static TResult GetUri<TResult>(string key,
             Func<Uri, TResult> onParsed,
             Func<string, TResult> unspecifiedOrInvalid)
         {
-            var keyValue = Get(key);
-            Uri uriValue;
-            if (!Uri.TryCreate(keyValue, UriKind.RelativeOrAbsolute, out uriValue))
-                return unspecifiedOrInvalid($"The configuration value for [{key}] is not specified. Please specify a URI value");
-            return onParsed(uriValue);
+            return GetString(key,
+                keyValue =>
+                {
+                    if (!Uri.TryCreate(keyValue, UriKind.RelativeOrAbsolute, out Uri uriValue))
+                        return unspecifiedOrInvalid($"The configuration value for [{key}] is invalid. Please specify a URI value");
+                    return onParsed(uriValue);
+                },
+                unspecifiedOrInvalid);
         }
 
         public static TResult GetDouble<TResult>(string key,
             Func<double, TResult> onParsed,
             Func<string, TResult> unspecifiedOrInvalid)
         {
-            var keyValue = Get(key);
-            double doubleValue;
-            if (!double.TryParse(keyValue, out doubleValue))
-                return unspecifiedOrInvalid(
-                    $"The configuration value for [{key}] is not specified. Please specify a double value");
-            return onParsed(doubleValue);
-        }
-
-        public static TResult GetString<TResult>(string key,
-            Func<string, TResult> onFound,
-            Func<string, TResult> onUnspecified)
-        {
-            try
-            {
-                //var keyValue = Microsoft.Azure.CloudConfigurationManager.GetSetting(key, false, true);
-                var keyValue = System.Configuration.ConfigurationManager.AppSettings[key];
-                return onFound(keyValue);
-            } catch(Exception ex)
-            {
-                var exceptionType = ex.GetType();
-                return onUnspecified($"The configuration value for [{key}] is not specified. Please specify a string value");
-            }
+            return GetString(key,
+                keyValue =>
+                {
+                    if (!double.TryParse(keyValue, out double doubleValue))
+                        return unspecifiedOrInvalid(
+                            $"The configuration value for [{key}] is invalid. Please specify a double value");
+                    return onParsed(doubleValue);
+                },
+                unspecifiedOrInvalid);
         }
 
         public static TResult GetGuid<TResult>(string key,
