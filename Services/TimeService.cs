@@ -1,10 +1,6 @@
-﻿using EastFive.Api.Services;
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Principal;
+﻿using System;
 
-namespace EastFive.Api.Services
+namespace EastFive.Web.Services
 {
     public class TimeService : Web.Services.ITimeService
     {
