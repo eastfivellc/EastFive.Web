@@ -27,6 +27,22 @@ namespace EastFive.Web.Configuration
                 return onFound(keyValue);
         }
 
+        public static TResult GetBoolean<TResult>(string key,
+            Func<bool, TResult> onParsed,
+            Func<TResult> onUnspecified,
+            Func<string, TResult> onInvalid)
+        {
+            return GetString(key,
+                keyValue =>
+                {
+                    if (!bool.TryParse(keyValue, out bool boolValue))
+                        return onInvalid(
+                            $"The configuration value for [{key}] is invalid. Please specify a double value");
+                    return onParsed(boolValue);
+                },
+                (why) => onUnspecified());
+        }
+
         public static TResult GetUri<TResult>(string key,
             Func<Uri, TResult> onParsed,
             Func<string, TResult> unspecifiedOrInvalid)
