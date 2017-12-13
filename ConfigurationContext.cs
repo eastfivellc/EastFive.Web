@@ -55,6 +55,7 @@ namespace BlackBarLabs.Web
                     return true;
                 },
                 ()=>false,
+                ()=>false,
                 ()=>false)).GetAwaiter().GetResult();
         }
 
@@ -73,12 +74,16 @@ namespace BlackBarLabs.Web
         private async static Task<TResult> GetKeyVaultSecretsAsync<TResult>(
              Func<Dictionary<string, string>, TResult> onFound,
              Func<TResult> onNotFound,
-             Func<TResult> onKeyVaultTokenInvalid)
+             Func<TResult> onKeyVaultTokenInvalid,
+             Func<TResult> onKeyVaultNotConfigured)
         {
             try
             {
                 var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetTokenAsync));
                 var vaultUrl = EastFive.Web.Configuration.Settings.GetString(Constants.KeyVault.Url, value => value, (reason) => string.Empty);
+                if (string.IsNullOrEmpty(vaultUrl))
+                    return onKeyVaultNotConfigured();
+
                 var secretBundle = await keyVaultClient.GetSecretsAsync(vaultUrl);
                 if (null == secretBundle)
                     return onNotFound();
