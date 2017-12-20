@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Web;
 using System.Linq;
+using System.Linq.Expressions;
+using EastFive.Linq.Expressions;
 
 namespace BlackBarLabs.Web
 {
@@ -13,6 +15,15 @@ namespace BlackBarLabs.Web
             query[parameter] = value;
             uriBuilder.Query = query.ToString();
             return uriBuilder.Uri;
+        }
+
+        public static Uri AddQueryParameter<QueryType, TValue>(this Uri uri, 
+            Expression<Func<QueryType, TValue>> parameterExpr, 
+            string value)
+        {
+            return parameterExpr.PropertyName(
+                (parameter) => uri.AddQueryParameter(parameter, value),
+                () => { throw new ArgumentException("Not a property expression", "parameterExpr"); });
         }
 
         public static int GetNextParameterIndex(this Uri uri, string parameter)
