@@ -1,9 +1,16 @@
 ﻿
-namespace EastFive.Web.Configuration
+namespace EastFive.Web
 {
     [Config]
-    public class Constants
+    public class AppSettings
     {
+        [ConfigKeyAttribute("Forces the token to invalidated and a 401 returned if it was generated before a certain time", DeploymentOverrides.Suggested,
+                Location = "This is should be date time of the WebUI client publish",
+                DeploymentSecurityConcern = false,
+                PrivateRepositoryOnly = false,
+            MoreInfo = "This may be necessary if the server is trying to force the client to refresh their browser.")]
+        public const string TokenForceRefreshTime = "EastFive.Web.TokenForceRefreshTime";
+
         [Config]
         public static class KeyVault
         {

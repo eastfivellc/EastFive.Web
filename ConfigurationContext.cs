@@ -80,7 +80,7 @@ namespace BlackBarLabs.Web
             try
             {
                 var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetTokenAsync));
-                var vaultUrl = EastFive.Web.Configuration.Settings.GetString(Constants.KeyVault.Url, value => value, (reason) => string.Empty);
+                var vaultUrl = EastFive.Web.Configuration.Settings.GetString(EastFive.Web.AppSettings.KeyVault.Url, value => value, (reason) => string.Empty);
                 if (string.IsNullOrEmpty(vaultUrl))
                     return onKeyVaultNotConfigured();
 
@@ -116,7 +116,7 @@ namespace BlackBarLabs.Web
             try
             {
                 var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetTokenAsync));
-                var vaultUrl = appSettings[Constants.KeyVault.Url];
+                var vaultUrl = appSettings[EastFive.Web.AppSettings.KeyVault.Url];
 
                 var secretBundle = await keyVaultClient.GetSecretAsync(vaultUrl, key);
                 if (null == secretBundle)
@@ -139,8 +139,8 @@ namespace BlackBarLabs.Web
         /// <returns></returns>
         private static async Task<string> GetTokenAsync(string authority, string resource, string scope)
         {
-            var clientId = appSettings[Constants.KeyVault.ClientId];
-            var clientSecret = appSettings[Constants.KeyVault.ClientSecret];
+            var clientId = appSettings[EastFive.Web.AppSettings.KeyVault.ClientId];
+            var clientSecret = appSettings[EastFive.Web.AppSettings.KeyVault.ClientSecret];
 
             var authContext = new AuthenticationContext(authority);
             ClientCredential clientCred = new ClientCredential(clientId, clientSecret);

@@ -56,6 +56,21 @@ namespace EastFive.Web.Configuration
                 },
                 unspecifiedOrInvalid);
         }
+        
+        public static TResult GetDateTime<TResult>(string key,
+            Func<DateTime, TResult> onParsed,
+            Func<string, TResult> unspecifiedOrInvalid)
+        {
+            return GetString(key,
+                keyValue =>
+                {
+                    if (!DateTime.TryParse(keyValue, out DateTime dateTimeValue))
+                        return unspecifiedOrInvalid(
+                            $"The configuration value for [{key}] is invalid. Please specify a valid date time");
+                    return onParsed(dateTimeValue);
+                },
+                unspecifiedOrInvalid);
+        }
 
         public static TResult GetDouble<TResult>(string key,
             Func<double, TResult> onParsed,

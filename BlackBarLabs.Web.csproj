@@ -158,7 +158,9 @@
     <Compile Include="Services\ITimeService.cs" />
     <Compile Include="Services\TimeService.cs" />
     <Compile Include="Settings\ConfigAttribute.cs" />
-    <Compile Include="Settings\Constants.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Tokens\JwtTools.cs" />
+    <Compile Include="Tokens\VoucherTools.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
