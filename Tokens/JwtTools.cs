@@ -86,11 +86,14 @@ namespace BlackBarLabs.Security.Tokens
                         var claims = principal.Claims.ToArray();
 
                         return EastFive.Web.Configuration.Settings.GetDateTime(
-                            EastFive.Web.AppSettings.TokenForceRefreshTime,
+                                EastFive.Web.AppSettings.TokenForceRefreshTime,
                             (notValidBeforeTime) =>
                             {
                                 if (validatedToken.ValidFrom < notValidBeforeTime)
-                                    return invalidToken("The Website has been updated and requires a browser reload");
+                                    return EastFive.Web.Configuration.Settings.GetString(
+                                            EastFive.Web.AppSettings.TokenForceRefreshMessage,
+                                        (message) => invalidToken(message),
+                                        (why) => invalidToken(why));
                                 return success(claims);
                             },
                             (why) => success(claims));

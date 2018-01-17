@@ -67,7 +67,8 @@ namespace EastFive.Web.Configuration
                     if (!DateTime.TryParse(keyValue, out DateTime dateTimeValue))
                         return unspecifiedOrInvalid(
                             $"The configuration value for [{key}] is invalid. Please specify a valid date time");
-                    return onParsed(dateTimeValue);
+                    var dateTimeValueUtc = dateTimeValue.ToUniversalTime();
+                    return onParsed(dateTimeValueUtc);
                 },
                 unspecifiedOrInvalid);
         }

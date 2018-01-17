@@ -11,6 +11,8 @@ namespace EastFive.Web
             MoreInfo = "This may be necessary if the server is trying to force the client to refresh their browser.")]
         public const string TokenForceRefreshTime = "EastFive.Web.TokenForceRefreshTime";
 
+        public const string TokenForceRefreshMessage = "EastFive.Web.TokenForceRefreshMessage";
+
         [Config]
         public static class KeyVault
         {
