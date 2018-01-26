@@ -6,8 +6,8 @@ using BlackBarLabs.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using EastFive.Web.Configuration;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using EastFive.Collections.Generic;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace BlackBarLabs.Web
 {
@@ -143,8 +143,8 @@ namespace BlackBarLabs.Web
             var clientSecret = appSettings[EastFive.Web.AppSettings.KeyVault.ClientSecret];
 
             var authContext = new AuthenticationContext(authority);
-            ClientCredential clientCred = new ClientCredential(clientId, clientSecret);
-            AuthenticationResult result = await authContext.AcquireTokenAsync(resource, clientCred);
+            var clientCred = new ClientCredential(clientId, clientSecret);
+            var result = await authContext.AcquireTokenAsync(resource, clientCred);
 
             if (result == null)
                 throw new InvalidOperationException("Failed to obtain the JWT token");
