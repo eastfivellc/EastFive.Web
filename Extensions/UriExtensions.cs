@@ -3,6 +3,7 @@ using System.Web;
 using System.Linq;
 using System.Linq.Expressions;
 using EastFive.Linq.Expressions;
+using System.Collections.Generic;
 
 namespace BlackBarLabs.Web
 {
@@ -23,6 +24,34 @@ namespace BlackBarLabs.Web
         {
             return parameterExpr.PropertyName(
                 (parameter) => uri.AddQueryParameter(parameter, value),
+                () => { throw new ArgumentException("Not a property expression", "parameterExpr"); });
+        }
+
+        public static Uri AddQueryParameter<QueryType, TValue>(this Uri uri,
+            Expression<Func<QueryType, TValue>> parameterExpr,
+            IDictionary<string, string> values)
+        {
+            return parameterExpr.PropertyName(
+                (parameter) =>
+                {
+                    return values.Aggregate(
+                        new
+                        {
+                            src = uri,
+                            index = 0,
+                        },
+                        (aggr, value) =>
+                        {
+                            return new
+                            {
+                                src = uri
+                                    .AddQueryParameter($"{parameter}[{aggr.index}].Key", value.Key)
+                                    .AddQueryParameter($"{parameter}[{aggr.index}].Value", value.Value),
+                                index = aggr.index + 1,
+                            };
+                        },
+                        (aggr) => aggr.src);
+                },
                 () => { throw new ArgumentException("Not a property expression", "parameterExpr"); });
         }
 
