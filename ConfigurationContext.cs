@@ -69,6 +69,19 @@ namespace BlackBarLabs.Web
             }
         }
 
+        public TResult GetSettingValue<TResult>(string key,
+            Func<string, TResult> onFound,
+            Func<TResult> onKeyDoesNotExist)
+        {
+            if (appSettings == null)
+                Initialize();
+
+            if (!AppSettings.ContainsKey(key))
+                onKeyDoesNotExist();
+
+            return onFound(appSettings[key]);
+        }
+
         #region Key Vault Support
 
         private async static Task<TResult> GetKeyVaultSecretsAsync<TResult>(
