@@ -138,7 +138,6 @@
     <Compile Include="Exceptions\ResourceNotFoundException.cs" />
     <Compile Include="Extensions\HeaderExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
-    <Compile Include="Extensions\UriExtensions.cs" />
     <Compile Include="Extensions\UrnExtensions.cs" />
     <Compile Include="Extensions\WebRequestExtensions.cs" />
     <Compile Include="MessageServiceExtensions.cs" />
