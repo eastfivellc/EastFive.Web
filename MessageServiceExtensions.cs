@@ -37,7 +37,10 @@ namespace EastFive.Api.Services
         public static Dictionary<string, string> AddMoney(this Dictionary<string, string> dictionary,
             string key, int value)
         {
-            dictionary.Add(key, (value / 100).ToString() + "." + (value % 100).ToString());
+            if(value < 0)
+                dictionary.Add(key, "-" + ((-value) / 100).ToString() + "." + ((-value) % 100).ToString());
+            else
+                dictionary.Add(key, (value / 100).ToString() + "." + (value % 100).ToString());
             return dictionary;
         }
     }
