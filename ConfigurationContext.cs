@@ -77,7 +77,7 @@ namespace BlackBarLabs.Web
                 Initialize();
 
             if (!AppSettings.ContainsKey(key))
-                onKeyDoesNotExist();
+                return onKeyDoesNotExist();
 
             return onFound(appSettings[key]);
         }

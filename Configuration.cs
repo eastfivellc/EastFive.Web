@@ -18,13 +18,10 @@ namespace EastFive.Web.Configuration
             Func<string, TResult> onFound,
             Func<string, TResult> onUnspecified)
         {
-                //var keyValue = Microsoft.Azure.CloudConfigurationManager.GetSetting(key, false, true);
-                //var keyValue = System.Configuration.ConfigurationManager.AppSettings[key];
-                if (!BlackBarLabs.Web.ConfigurationContext.Instance.AppSettings.ContainsKey(key))
-                    return onUnspecified($"Z - The configuration value for [{key}] is not specified. Please specify a string value");
-
-                var keyValue = BlackBarLabs.Web.ConfigurationContext.Instance.AppSettings[key];
-                return onFound(keyValue);
+            return BlackBarLabs.Web.ConfigurationContext.Instance.GetSettingValue(key,
+                    onFound,
+                    () => onUnspecified($"Z - The configuration value for [{key}] is not specified. Please specify a string value"));
+            
         }
 
         public static TResult GetBoolean<TResult>(string key,
