@@ -109,8 +109,9 @@ namespace BlackBarLabs.Web
                             () => string.Empty,
                             () => string.Empty);
 
-
-                        return secret.Identifier.Name.PairWithValue(secretValue);
+                        // KeyVault will only allow Alphanumberic characters and dashes.  Replace - with . to keep our  
+                        // current naming convention.  Yes - this means we cannot have dashes in our names.
+                        return secret.Identifier.Name.Replace("-", ".").PairWithValue(secretValue);
                     }).WhenAllAsync();
 
                 return onFound(secrets.ToDictionary());
