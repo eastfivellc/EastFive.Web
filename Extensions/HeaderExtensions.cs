@@ -7,8 +7,9 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using BlackBarLabs.Security.Tokens;
 using System.Configuration;
+using EastFive.Extensions;
 
-namespace BlackBarLabs.Web
+namespace EastFive.Web
 {
     public static class HeaderExtensions
     {
@@ -65,6 +66,17 @@ namespace BlackBarLabs.Web
                 //throw new ArgumentException("Problem getting user id from Authorization header");
                 throw;
             }
+        }
+
+        public static bool IsJson(this HttpContent content)
+        {
+            if (content.Headers.IsDefaultOrNull())
+                return true;
+
+            if (content.Headers.ContentType.IsDefaultOrNull())
+                return true;
+
+            return String.Compare("application/json", content.Headers.ContentType.MediaType.ToLower(), true) == 0;
         }
 
         public static TResult ParseHttpMethod<TResult>(this string methodName,
