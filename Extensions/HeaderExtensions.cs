@@ -71,10 +71,10 @@ namespace EastFive.Web
         public static bool IsJson(this HttpContent content)
         {
             if (content.Headers.IsDefaultOrNull())
-                return true;
+                return false;
 
             if (content.Headers.ContentType.IsDefaultOrNull())
-                return true;
+                return false;
 
             return String.Compare("application/json", content.Headers.ContentType.MediaType.ToLower(), true) == 0;
         }
