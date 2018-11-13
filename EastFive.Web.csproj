@@ -7,8 +7,8 @@
     <ProjectGuid>{5BB52391-2704-44C0-BC8A-DBBE31498814}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BlackBarLabs.Web</RootNamespace>
-    <AssemblyName>BlackBarLabs.Web</AssemblyName>
+    <RootNamespace>EastFive.Web</RootNamespace>
+    <AssemblyName>EastFive.Web</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -155,6 +155,7 @@
     <Compile Include="Services\TimeService.cs" />
     <Compile Include="Settings\ConfigAttribute.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Tokens\ClaimIds.cs" />
     <Compile Include="Tokens\JwtTools.cs" />
     <Compile Include="Tokens\VoucherTools.cs" />
   </ItemGroup>
