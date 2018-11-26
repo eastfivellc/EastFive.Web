@@ -20,7 +20,7 @@ namespace EastFive.Web.Configuration
         {
             return BlackBarLabs.Web.ConfigurationContext.Instance.GetSettingValue(key,
                     onFound,
-                    () => onUnspecified($"Z - The configuration value for [{key}] is not specified. Please specify a string value"));
+                    () => onUnspecified($" - The configuration value for [{key}] is not specified. Please specify a string value"));
             
         }
 
