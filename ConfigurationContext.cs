@@ -8,6 +8,7 @@ using Microsoft.Azure.KeyVault;
 using EastFive.Web.Configuration;
 using EastFive.Collections.Generic;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.Threading;
 
 namespace BlackBarLabs.Web
 {
@@ -39,7 +40,7 @@ namespace BlackBarLabs.Web
             }
         }
 
-        private void Initialize()
+        private Dictionary<string, string> Initialize()
         {
             var appSettingsFromConfigFile = System.Configuration.ConfigurationManager.AppSettings;
             var settings = appSettingsFromConfigFile.AllKeys.Select(
@@ -53,47 +54,44 @@ namespace BlackBarLabs.Web
                 !settings.TryGetValue(EastFive.Web.AppSettings.KeyVault.ClientId, out string clientId) ||
                 !settings.TryGetValue(EastFive.Web.AppSettings.KeyVault.ClientSecret, out string clientSecret))
             {
-                appSettings = settings;
-                return;
+                return settings;
             }
 
             // Merge Key Vault keys into app settings dictionary.  If there is a key conflict, favor Key Vault.
-            Task.Run(()=> GetKeyVaultSecretsAsync(vaultUrl, clientId, clientSecret,
+            return GetKeyVaultSecretsAsync(vaultUrl, clientId, clientSecret,
                 keyVaultValues =>
                 {
-                    appSettings = settings.Where(pair => !keyVaultValues.Keys.Contains(pair.Key)).Concat(keyVaultValues).ToDictionary();
-                    return true;
+                    return settings.Where(pair => !keyVaultValues.Keys.Contains(pair.Key)).Concat(keyVaultValues).ToDictionary();
                 },
                 ()=> 
                 {
-                    appSettings = settings;
-                    return false;
+                    return settings;
                 },
                 () =>
                 {
-                    appSettings = settings;
-                    return false;
+                    return settings;
                 },
                 () =>
                 {
-                    appSettings = settings;
-                    return false;
-                })).GetAwaiter().GetResult();
+                    return settings;
+                }).GetAwaiter().GetResult();
         }
 
+        private static EventWaitHandle appSettingsLock = new AutoResetEvent(true);
         public Dictionary<string, string> AppSettings
         {
             get
             {
-                if (appSettings == null)
+                try
                 {
-                    lock (syncAppSettings)
-                    {
-                        if (appSettings == null)
-                            Initialize();
-                    }
+                    appSettingsLock.WaitOne();
+                    if (appSettings == null)
+                        appSettings = Initialize();
+                    return appSettings;
+                } finally
+                {
+                    appSettingsLock.Set();
                 }
-                return appSettings;
             }
         }
 
