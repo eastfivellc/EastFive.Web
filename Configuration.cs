@@ -19,9 +19,8 @@ namespace EastFive.Web.Configuration
             Func<string, TResult> onUnspecified)
         {
             return BlackBarLabs.Web.ConfigurationContext.Instance.GetSettingValue(key,
-                    onFound,
-                    () => onUnspecified($" - The configuration value for [{key}] is not specified. Please specify a string value"));
-            
+                onFound,
+                () => onUnspecified($" - The configuration value for [{key}] is not specified. Please specify a string value"));
         }
 
         public static TResult GetBoolean<TResult>(string key,
