@@ -161,6 +161,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceQuery.cs" />
     <Compile Include="RollbackAsync.cs" />
+    <Compile Include="Security\Crypto\CryptoTools.cs" />
+    <Compile Include="Security\Crypto\Rsa.cs" />
+    <Compile Include="Security\Utilities\RSA.cs" />
     <Compile Include="ServiceConfiguration.cs" />
     <Compile Include="Services\ISendMessageService.cs" />
     <Compile Include="Services\ITimeService.cs" />
@@ -176,10 +179,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BlackBarLabs.Security\BlackBarLabs.Security.csproj">
-      <Project>{17a2e027-c32a-41db-9b46-5222d55c0e26}</Project>
-      <Name>BlackBarLabs.Security</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BlackBarLabs.Core\EastFive.Core.csproj">
       <Project>{aec927ef-6aae-4533-bbf6-539643684002}</Project>
       <Name>EastFive.Core</Name>

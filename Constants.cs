@@ -1,4 +1,6 @@
 ﻿
+using EastFive.Web;
+
 namespace EastFive.Web
 {
     [Config]
@@ -29,5 +31,22 @@ namespace EastFive.Web
                 DeploymentSecurityConcern = true)]
             public const string ClientSecret = "KeyVault.ClientSecret";
         }
+    }
+}
+
+namespace EastFive.Security
+{
+    [Config]
+    public class AppSettings
+    {
+        // Key Signature
+        public const string TokenScope = "EastFive.Security.Token.Scope";
+        public const string TokenIssuer = "EastFive.Security.Token.Issuer";
+        public const string TokenKey = "EastFive.Security.Token.Key";
+
+        // Voucher tools
+        public const string CredentialProviderVoucherKey = "EastFive.Security.CredentialProvider.Voucher.Key";
+        public const string CredentialProviderVoucherProviderId = "EastFive.Security.CredentialProvider.Voucher.Provider";
+
     }
 }
