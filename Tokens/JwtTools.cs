@@ -143,8 +143,10 @@ namespace BlackBarLabs.Security.Tokens
             string configNameOfIssuer = EastFive.Security.AppSettings.TokenIssuer,
             string configNameOfRSAKey = EastFive.Security.AppSettings.TokenKey)
         {
-            var claimsAuth = (IEnumerable<Claim>)new[] {
-                new Claim(ClaimIds.Session, sessionId.ToString()), };
+            var claimsAuth = (IEnumerable<Claim>)new[]
+            {
+                new Claim(ClaimIds.Session, sessionId.ToString()),
+            };
             var claimsCrypt = claims.NullToEmpty().Select(kvp => new Claim(kvp.Key, kvp.Value));
 
             var issued = DateTime.UtcNow;
