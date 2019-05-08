@@ -84,7 +84,7 @@ namespace BlackBarLabs.Persistence
                 result => result.IsFailure,
                 async (failedResult) =>
                 {
-                    await results.Select(result => result.Rollback()).WhenAllAsync();
+                    await results.Select(result => result.Rollback()).RunAllAsync();
                     return failed(failedResult.FailureResult);
                 },
                 async () =>
@@ -173,7 +173,7 @@ namespace BlackBarLabs.Persistence
                 result => result.IsFailure,
                 async (failedResult) =>
                 {
-                    await results.Select(result => result.Rollback()).WhenAllAsync();
+                    await results.Select(result => result.Rollback()).RunAllAsync();
                     return failed(failedResult.FailureResult);
                 },
                 async () =>
