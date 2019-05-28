@@ -176,6 +176,10 @@
     <Compile Include="Tokens\ClaimIds.cs" />
     <Compile Include="Tokens\JwtTools.cs" />
     <Compile Include="Tokens\VoucherTools.cs" />
+    <Compile Include="Xml\IExtendXPath.cs" />
+    <Compile Include="Xml\XPathExtensionAttribute.cs" />
+    <Compile Include="Xml\XPathExtensionFunctions.cs" />
+    <Compile Include="Xml\XsltXPathExtensionContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
