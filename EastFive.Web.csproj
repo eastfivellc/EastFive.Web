@@ -151,10 +151,7 @@
     <Compile Include="Attributes\ResourceTypeAttribute.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="ConfigurationContext.cs" />
-    <Compile Include="Exceptions\ResourceCantBeUpdatedException.cs" />
-    <Compile Include="Exceptions\ResourceAlreadyExistsException.cs" />
-    <Compile Include="Exceptions\ResourceConflictException.cs" />
-    <Compile Include="Exceptions\ResourceNotFoundException.cs" />
+    <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Extensions\HeaderExtensions.cs" />
     <Compile Include="Extensions\JsonExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
