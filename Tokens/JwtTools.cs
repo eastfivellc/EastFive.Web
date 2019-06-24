@@ -1,4 +1,5 @@
-﻿using EastFive.Security;
+﻿using BlackBarLabs.Web;
+using EastFive.Security;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections;
@@ -64,8 +65,7 @@ namespace BlackBarLabs.Security.Tokens
             var result = RSA.FromConfig(configNameOfRsaKeyToValidateAgainst,
                 rsaProvider =>
                 {
-
-                    var issuer = Microsoft.Azure.CloudConfigurationManager.GetSetting(configNameOfIssuerToValidateAgainst);
+                    var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuerToValidateAgainst];
                     if (string.IsNullOrEmpty(issuer))
                         return missingConfigurationSetting(configNameOfIssuerToValidateAgainst);
 
@@ -220,7 +220,7 @@ namespace BlackBarLabs.Security.Tokens
                 {
                     var securityKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider);
 
-                    var issuer = Microsoft.Azure.CloudConfigurationManager.GetSetting(configNameOfIssuer);
+                    var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuer];
                     if (string.IsNullOrWhiteSpace(issuer))
                         return missingConfigurationSetting(configNameOfIssuer);
 

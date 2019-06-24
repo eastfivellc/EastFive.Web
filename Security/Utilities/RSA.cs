@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
+using BlackBarLabs.Web;
 using EastFive.Security.Crypto;
 
 namespace EastFive.Security
@@ -42,7 +42,7 @@ namespace EastFive.Security
             Func<string, TResult> missingConfigurationSetting,
             Func<string, string, TResult> invalidConfigurationSetting)
         {
-            var secretAsRSAXmlBase64 = Microsoft.Azure.CloudConfigurationManager.GetSetting(configSettingName);
+            var secretAsRSAXmlBase64 = ConfigurationContext.Instance.AppSettings[configSettingName];
             if (string.IsNullOrWhiteSpace(secretAsRSAXmlBase64))
                 return missingConfigurationSetting(configSettingName);
 
