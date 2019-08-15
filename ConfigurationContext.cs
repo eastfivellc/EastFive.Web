@@ -150,7 +150,7 @@ namespace BlackBarLabs.Web
 
                 return onFound(secrets.ToDictionary());
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return onKeyVaultTokenInvalid();
             }
