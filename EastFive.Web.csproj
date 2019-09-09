@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\ResourceTypeAttribute.cs" />
+    <Compile Include="ConfigurationExtensions.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="ConfigurationContext.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />

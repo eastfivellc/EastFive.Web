@@ -13,24 +13,21 @@ namespace EastFive.Web
 
         public Type ParameterType { get; private set; }
 
-        public Type ResultType { get; private set; }
-
-        public ConfigurationException(string parameterName, Type parameterType, string message, Type resultType)
+        public ConfigurationException(string parameterName, Type parameterType, string message)
             : base(message)
         {
             this.ParameterName = parameterName;
             this.ParameterType = parameterType;
-            this.ResultType = resultType;
         }
 
         public static TResult OnConfigurationFailure<TResult>(string parameterName, Type parameterType, string message)
         {
-            throw new ConfigurationException(parameterName, parameterType, message, typeof(TResult));
+            throw new ConfigurationException(parameterName, parameterType, message);
         }
 
         public static TResult OnConfigurationFailureWhy<TResult>(string message)
         {
-            throw new ConfigurationException(string.Empty, typeof(string), message, typeof(TResult));
+            throw new ConfigurationException(string.Empty, typeof(string), message);
         }
     }
 }
