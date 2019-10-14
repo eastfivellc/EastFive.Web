@@ -33,8 +33,8 @@ namespace BlackBarLabs.Security.Tokens
 
         public static TResult GetGuidValue<TResult>(this Claim[] claims, string key,
             Func<Guid, TResult> found,
-            Func<TResult> notFound = default(Func<TResult>),
-            Func<TResult> invalid = default(Func<TResult>))
+            Func<TResult> notFound = default,
+            Func<TResult> invalid = default)
         {
             if (default(Func<TResult>) == notFound)
                 notFound = () => { throw new Exception("Session not found in claims"); };
@@ -134,9 +134,8 @@ namespace BlackBarLabs.Security.Tokens
                 configNameOfIssuer, configNameOfRSAKey);
         }
 
-        public static TResult CreateToken<TResult>(Guid sessionId, Uri scope,
-            TimeSpan duration,
-            IDictionary<string, string> claims,
+        public static TResult CreateToken<TResult>(Guid sessionId,
+                Uri scope, TimeSpan duration, IDictionary<string, string> claims,
             Func<string, TResult> tokenCreated,
             Func<string, TResult> missingConfigurationSetting,
             Func<string, string, TResult> invalidConfigurationSetting,

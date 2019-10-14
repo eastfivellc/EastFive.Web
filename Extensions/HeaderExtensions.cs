@@ -79,6 +79,21 @@ namespace EastFive.Web
             return String.Compare("application/json", content.Headers.ContentType.MediaType.ToLower(), true) == 0;
         }
 
+        public static bool IsXml(this HttpContent content)
+        {
+            if (content.Headers.IsDefaultOrNull())
+                return false;
+
+            if (content.Headers.ContentType.IsDefaultOrNull())
+                return false;
+
+            var mediaTypeStr = content.Headers.ContentType.MediaType.ToLower();
+            if (String.Compare("application/xml", mediaTypeStr, true) == 0)
+                return true;
+
+            return mediaTypeStr.Contains("xml");
+        }
+
         public static TResult ParseHttpMethod<TResult>(this string methodName,
             Func<HttpMethod, TResult> success,
             Func<TResult> failed)
