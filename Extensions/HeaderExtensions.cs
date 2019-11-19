@@ -70,6 +70,9 @@ namespace EastFive.Web
 
         public static bool IsJson(this HttpContent content)
         {
+            if (content.IsDefaultOrNull())
+                return false;
+
             if (content.Headers.IsDefaultOrNull())
                 return false;
 
@@ -81,6 +84,9 @@ namespace EastFive.Web
 
         public static bool IsXml(this HttpContent content)
         {
+            if (content.IsDefaultOrNull())
+                return false;
+
             if (content.Headers.IsDefaultOrNull())
                 return false;
 
