@@ -158,19 +158,6 @@ namespace BlackBarLabs.Security.Tokens
 
         public static TResult CreateToken<TResult>(Guid sessionId, Guid authId, Uri scope,
             TimeSpan duration,
-            Func<string, TResult> tokenCreated,
-            Func<string, TResult> missingConfigurationSetting,
-            Func<string, string, TResult> invalidConfigurationSetting,
-            string configNameOfIssuer = EastFive.Security.AppSettings.TokenIssuer,
-            string configNameOfRSAKey = EastFive.Security.AppSettings.TokenKey)
-        {
-            return CreateToken(sessionId, authId, scope, duration, default(IDictionary<string, string>),
-                tokenCreated, missingConfigurationSetting, invalidConfigurationSetting,
-                configNameOfIssuer, configNameOfRSAKey);
-        }
-
-        public static TResult CreateToken<TResult>(Guid sessionId, Guid authId, Uri scope,
-            TimeSpan duration,
             IDictionary<string, string> claims,
             Func<string, TResult> tokenCreated,
             Func<string, TResult> missingConfigurationSetting,
