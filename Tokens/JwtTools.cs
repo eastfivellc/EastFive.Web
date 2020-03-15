@@ -1,15 +1,16 @@
-﻿using BlackBarLabs.Web;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+
+using Microsoft.IdentityModel.Tokens;
+
+using BlackBarLabs.Web;
 using EastFive.Linq;
 using EastFive.Security;
 using EastFive.Security.Tokens;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
 
 namespace BlackBarLabs.Security.Tokens
 {

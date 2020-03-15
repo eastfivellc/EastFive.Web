@@ -23,7 +23,7 @@ namespace EastFive.Security.Crypto
         public static string UrlBase64Encode(string text)
         {
             var bytes = Encoding.UTF8.GetBytes(text);
-            return System.Web.HttpServerUtility.UrlTokenEncode(bytes);
+            return System.Web.HttpUtility.UrlEncode(bytes); // UrlTokenEncode(bytes);
         }
 
         public static string UrlBase64Decode(string text)
