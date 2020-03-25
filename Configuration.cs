@@ -8,35 +8,13 @@ namespace EastFive.Web.Configuration
 {
     public static class Settings
     {
-        [Obsolete]
-        public static string Get(string key)
-        {
-            return Microsoft.Azure.CloudConfigurationManager.GetSetting(key);
-        }
-        
         public static TResult GetString<TResult>(string key,
             Func<string, TResult> onFound,
             Func<string, TResult> onUnspecified)
         {
-            return BlackBarLabs.Web.ConfigurationContext.Instance.GetSettingValue(key,
+            return key.ConfigurationString(
                 onFound,
-                () => onUnspecified($" - The configuration value for [{key}] is not specified. Please specify a string value"));
-        }
-
-        public static TResult GetBoolean<TResult>(string key,
-            Func<bool, TResult> onParsed,
-            Func<TResult> onUnspecified,
-            Func<string, TResult> onInvalid)
-        {
-            return GetString(key,
-                keyValue =>
-                {
-                    if (!bool.TryParse(keyValue, out bool boolValue))
-                        return onInvalid(
-                            $"The configuration value for [{key}] is invalid. Please specify a double value");
-                    return onParsed(boolValue);
-                },
-                (why) => onUnspecified());
+                onUnspecified);
         }
 
         public static TResult GetUri<TResult>(string key,

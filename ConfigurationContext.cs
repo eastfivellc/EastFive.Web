@@ -10,6 +10,7 @@ using EastFive.Collections.Generic;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.Threading;
 using EastFive.Extensions;
+using Microsoft.Extensions.Configuration;
 
 namespace BlackBarLabs.Web
 {
@@ -21,90 +22,9 @@ namespace BlackBarLabs.Web
         private static volatile ConfigurationContext instance;
         private static object syncRoot = new Object();
         private static Dictionary<string, string> appSettings;
-        private static object syncAppSettings = new Object();
-
+        private static IConfiguration configuration;
         private ConfigurationContext() { }
 
-        public static ConfigurationContext Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    lock (syncRoot)
-                    {
-                        if (instance == null)
-                            instance = new ConfigurationContext();
-                    }
-                }
-                return instance;
-            }
-        }
-
-        private Dictionary<string, string> Initialize()
-        {
-            var appSettingsFromConfigFile = System.Configuration.ConfigurationManager.AppSettings;
-            var settings = appSettingsFromConfigFile.AllKeys.Select(
-                key =>
-                {
-                    return key.PairWithValue(appSettingsFromConfigFile[key]);
-                }).ToDictionary();
-
-            // Set appSettings at the last moment so that the lock keeps everybody out until all is initialized 
-            if (!settings.TryGetValue(EastFive.Web.AppSettings.KeyVault.Url, out string vaultUrl) ||
-                !settings.TryGetValue(EastFive.Web.AppSettings.KeyVault.ClientId, out string clientId) ||
-                !settings.TryGetValue(EastFive.Web.AppSettings.KeyVault.ClientSecret, out string clientSecret))
-            {
-                return settings;
-            }
-
-            // Merge Key Vault keys into app settings dictionary.  If there is a key conflict, favor Key Vault.
-            return GetKeyVaultSecretsAsync(vaultUrl, clientId, clientSecret,
-                keyVaultValues =>
-                {
-                    return settings.Where(pair => !keyVaultValues.Keys.Contains(pair.Key)).Concat(keyVaultValues).ToDictionary();
-                },
-                ()=> 
-                {
-                    return settings;
-                },
-                () =>
-                {
-                    return settings;
-                },
-                () =>
-                {
-                    return settings;
-                }).GetAwaiter().GetResult();
-        }
-
-        private static EventWaitHandle appSettingsLock = new AutoResetEvent(true);
-        public Dictionary<string, string> AppSettings
-        {
-            get
-            {
-                try
-                {
-                    appSettingsLock.WaitOne();
-                    if (appSettings == null)
-                        appSettings = Initialize();
-                    return appSettings;
-                } finally
-                {
-                    appSettingsLock.Set();
-                }
-            }
-        }
-
-        public TResult GetSettingValue<TResult>(string key,
-            Func<string, TResult> onFound,
-            Func<TResult> onKeyDoesNotExist)
-        {
-            if (!AppSettings.ContainsKey(key))
-                return onKeyDoesNotExist();
-
-            return onFound(appSettings[key]);
-        }
 
         #region Key Vault Support
 

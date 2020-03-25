@@ -1,4 +1,5 @@
 ﻿using EastFive.Extensions;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,19 +10,25 @@ namespace EastFive.Web.Configuration
 {
     public static class ConfigurationExtensions
     {
+        private static IConfiguration configuration;
+
+        public static void Initialize(IConfiguration configuration)
+        {
+            ConfigurationExtensions.configuration = configuration;
+        }
+
         public static TResult ConfigurationString<TResult>(this string key,
             Func<string, TResult> onFound,
             Func<string, TResult> onUnspecified = default)
         {
-            return BlackBarLabs.Web.ConfigurationContext.Instance.GetSettingValue(key,
-                onFound,
-                () =>
-                {
-                    var msg = $" - The configuration value for [{key}] is not specified. Please specify a string value";
-                    if (!onUnspecified.IsDefault())
-                        return onUnspecified(msg);
-                    throw new ConfigurationException(key, typeof(string), msg);
-                });
+            var value = configuration[key];
+            if (!value.IsDefaultOrNull())
+                return onFound(value);
+            
+            var msg = $" - The configuration value for [{key}] is not specified. Please specify a string value";
+            if (!onUnspecified.IsDefault())
+                return onUnspecified(msg);
+            throw new ConfigurationException(key, typeof(string), msg);
         }
 
         private static TResult ConfigurationBase<TBase, TResult>(string key,

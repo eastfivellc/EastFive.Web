@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BlackBarLabs.Web;
 using EastFive.Security.Crypto;
+using EastFive.Web.Configuration;
 
 namespace EastFive.Security
 {
@@ -42,29 +43,23 @@ namespace EastFive.Security
             Func<string, TResult> missingConfigurationSetting,
             Func<string, string, TResult> invalidConfigurationSetting)
         {
-            var secretAsRSAXmlBase64 = ConfigurationContext.Instance.AppSettings[configSettingName];
-            if (string.IsNullOrWhiteSpace(secretAsRSAXmlBase64))
-                return missingConfigurationSetting(configSettingName);
-
-            try
-            {
-                var bytes = Convert.FromBase64String(secretAsRSAXmlBase64);
-                var xml = Encoding.ASCII.GetString(bytes);
-                var rsaProvider = new RSACryptoServiceProvider();
-                try
+            return configSettingName.ConfigurationBase64Bytes(
+                bytes => //ConfigurationContext.Instance.AppSettings[configSettingName];
                 {
-                    rsaProvider.FromXmlString(xml);
-                    return success(rsaProvider);
-                }
-                catch (CryptographicException ex)
-                {
-                    return invalidConfigurationSetting(configSettingName, ex.Message);
-                }
-            }
-            catch (FormatException ex)
-            {
-                return invalidConfigurationSetting(configSettingName, ex.Message);
-            }
+                    var xml = Encoding.ASCII.GetString(bytes);
+                    var rsaProvider = new RSACryptoServiceProvider();
+                    try
+                    {
+                        rsaProvider.FromXmlString(xml);
+                        return success(rsaProvider);
+                    }
+                    catch (CryptographicException ex)
+                    {
+                        return invalidConfigurationSetting(configSettingName, ex.Message);
+                    }
+                },
+                onFailure:(why) => invalidConfigurationSetting(configSettingName, why),
+                onNotSpecified:() => missingConfigurationSetting(configSettingName));
         }
 
         public static TResult Generate<TResult>(Func<string, string, TResult> success)
