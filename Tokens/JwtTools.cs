@@ -12,6 +12,7 @@ using EastFive.Linq;
 using EastFive.Security;
 using EastFive.Security.Tokens;
 using EastFive.Web.Configuration;
+using EastFive.Extensions;
 
 namespace BlackBarLabs.Security.Tokens
 {
@@ -57,14 +58,14 @@ namespace BlackBarLabs.Security.Tokens
                     notFound);
         }
 
-        public static TResult ParseToken<TResult>(
+        public static TResult ParseAndValidateToken<TResult>(
             this string jwtEncodedString,
             Func<Claim [], TResult> success,
             Func<string, TResult> invalidToken,
             Func<string, TResult> missingConfigurationSetting,
             Func<string, string, TResult> invalidConfigurationSetting,
-            string configNameOfIssuerToValidateAgainst = EastFive.Security.AppSettings.TokenIssuer,
-            string configNameOfRsaKeyToValidateAgainst = EastFive.Security.AppSettings.TokenKey)
+            string configNameOfIssuerToValidateAgainst = AppSettings.TokenIssuer,
+            string configNameOfRsaKeyToValidateAgainst = AppSettings.TokenKey)
         {
             var result = RSA.FromConfig(configNameOfRsaKeyToValidateAgainst,
                 rsaProvider =>
@@ -85,9 +86,9 @@ namespace BlackBarLabs.Security.Tokens
 
                             try
                             {
-                                Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
                                 var handler = new JwtSecurityTokenHandler();
-                                var principal = handler.ValidateToken(jwtEncodedString, validationParameters, out validatedToken);
+                                var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
+                                    out SecurityToken validatedToken);
 
                                 // TODO: Check if token is still valid at current date / time?
                                 var claims = principal.Claims.ToArray();
@@ -109,15 +110,15 @@ namespace BlackBarLabs.Security.Tokens
                             {
                                 return invalidToken(ex.Message);
                             }
-                            catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException ex)
+                            catch (SecurityTokenInvalidIssuerException ex)
                             {
                                 return invalidToken(ex.Message);
                             }
-                            catch (Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException ex)
+                            catch (SecurityTokenExpiredException ex)
                             {
                                 return invalidToken(ex.Message);
                             }
-                            catch (Microsoft.IdentityModel.Tokens.SecurityTokenException ex)
+                            catch (SecurityTokenException ex)
                             {
                                 return invalidToken(ex.Message);
                             }
@@ -129,7 +130,35 @@ namespace BlackBarLabs.Security.Tokens
             return result;
         }
 
-
+        public static TResult ParseToken<TResult>(
+            this string jwtEncodedString,
+            Func<JwtSecurityToken, TResult> onSuccess,
+            Func<string, TResult> invalidToken)
+        {
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(jwtEncodedString);
+                
+                return onSuccess(jwtToken);
+            }
+            catch (ArgumentException ex)
+            {
+                return invalidToken(ex.Message);
+            }
+            catch (SecurityTokenInvalidIssuerException ex)
+            {
+                return invalidToken(ex.Message);
+            }
+            catch (SecurityTokenExpiredException ex)
+            {
+                return invalidToken(ex.Message);
+            }
+            catch (SecurityTokenException ex)
+            {
+                return invalidToken(ex.Message);
+            }
+        }
 
         public static TResult CreateToken<TResult>(Uri scope,
             DateTime issued, TimeSpan duration,

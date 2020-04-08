@@ -22,10 +22,12 @@ namespace EastFive.Web
                 Location ="Azure Portal -> KeyValue -> Settings -> (I'm making this up)",
                 DeploymentSecurityConcern = true)]
             public const string Url = "KeyVault.Url";
+
             [ConfigKeyAttribute("The KeyValue at the url is multitennant so the client id specifies the tennant",
                 DeploymentOverrides.Suggested,
                 DeploymentSecurityConcern = true)]
             public const string ClientId = "KeyVault.ClientId";
+
             [ConfigKeyAttribute("Used by the application to authenticate to the KeyVault",
                 DeploymentOverrides.Suggested,
                 DeploymentSecurityConcern = true)]
@@ -40,8 +42,23 @@ namespace EastFive.Security
     public class AppSettings
     {
         // Key Signature
+        [ConfigKey("Limits scope of provided access for a given security token.",
+            DeploymentOverrides.Suggested,
+            DeploymentSecurityConcern = true,
+            Location = "App dependent")]
         public const string TokenScope = "EastFive.Security.Token.Scope";
+
+        [ConfigKey("Identifies issuer of token (essentially scopes token use).",
+            DeploymentOverrides.Suggested,
+            DeploymentSecurityConcern = true,
+            Location = "App dependent")]
         public const string TokenIssuer = "EastFive.Security.Token.Issuer";
+
+        [ConfigKey("Identifies issuer of token (essentially scopes token use).",
+            DeploymentOverrides.Suggested,
+            DeploymentSecurityConcern = true,
+            PrivateRepositoryOnly = true,
+            Location = "Generated RSA key (tool available in Admin Portal)")]
         public const string TokenKey = "EastFive.Security.Token.Key";
 
         // Voucher tools

@@ -40,7 +40,7 @@ namespace EastFive.Web
                 var securityClientJwtString = jwtStringPossibleBearer.ToLower().StartsWith(BearerTokenPrefix) ?
                     jwtStringPossibleBearer.Substring(BearerTokenPrefix.Length) :
                     jwtStringPossibleBearer;
-                var result = securityClientJwtString.ParseToken(
+                var result = securityClientJwtString.ParseAndValidateToken(
                     (claims) =>
                     {
                         return success(claims);
@@ -66,6 +66,34 @@ namespace EastFive.Web
                 throw;
             }
         }
+
+        public static TResult ParseJwtString<TResult>(this string jwtString,
+            Func<System.IdentityModel.Tokens.Jwt.JwtSecurityToken, TResult> onSuccess,
+            Func<string, TResult> failure)
+        {
+            try
+            {
+                var jwtStringPossibleBearer = jwtString;
+                var securityClientJwtString = jwtStringPossibleBearer.ToLower().StartsWith(BearerTokenPrefix) ?
+                    jwtStringPossibleBearer.Substring(BearerTokenPrefix.Length) :
+                    jwtStringPossibleBearer;
+                return securityClientJwtString.ParseToken(
+                    (claims) =>
+                    {
+                        return onSuccess(claims);
+                    },
+                    (why) =>
+                    {
+                        return failure(why);
+                    });
+            }
+            catch (Exception)
+            {
+                //throw new ArgumentException("Problem getting user id from Authorization header");
+                throw;
+            }
+        }
+
 
         public static bool IsJson(this HttpContent content)
         {
