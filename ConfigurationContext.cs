@@ -19,10 +19,6 @@ namespace BlackBarLabs.Web
     /// </summary>
     public sealed class ConfigurationContext
     {
-        private static volatile ConfigurationContext instance;
-        private static object syncRoot = new Object();
-        private static Dictionary<string, string> appSettings;
-        private static IConfiguration configuration;
         private ConfigurationContext() { }
 
 
