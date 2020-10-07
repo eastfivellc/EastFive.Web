@@ -38,28 +38,51 @@ namespace EastFive.Security
             }
         }
 
-        public static TResult FromConfig<TResult>(string configSettingName,
+        public static TResult RSAFromConfig<TResult>(this string configSettingName,
             Func<RSACryptoServiceProvider, TResult> success,
-            Func<string, TResult> missingConfigurationSetting,
-            Func<string, string, TResult> invalidConfigurationSetting)
+            Func<TResult> missingConfigurationSetting,
+            Func<string, TResult> invalidConfigurationSetting)
         {
             return configSettingName.ConfigurationBase64Bytes(
-                bytes => //ConfigurationContext.Instance.AppSettings[configSettingName];
+                bytes =>
                 {
                     var xml = Encoding.ASCII.GetString(bytes);
-                    var rsaProvider = new RSACryptoServiceProvider();
-                    try
-                    {
-                        rsaProvider.FromXmlString(xml);
-                        return success(rsaProvider);
-                    }
-                    catch (CryptographicException ex)
-                    {
-                        return invalidConfigurationSetting(configSettingName, ex.Message);
-                    }
+                    return xml.RSAFromXml(success, (why) => invalidConfigurationSetting(why));
                 },
-                onFailure:(why) => invalidConfigurationSetting(configSettingName, why),
-                onNotSpecified:() => missingConfigurationSetting(configSettingName));
+                onFailure: (why) => invalidConfigurationSetting(why),
+                onNotSpecified: () => missingConfigurationSetting());
+        }
+
+        public static TResult RSAFromBase64<TResult>(this string secretAsRSAXmlBase64,
+            Func<RSACryptoServiceProvider, TResult> success,
+            Func<string, TResult> invalidToken)
+        {
+            try
+            {
+                var bytes = Convert.FromBase64String(secretAsRSAXmlBase64);
+                var xml = Encoding.ASCII.GetString(bytes);
+                return xml.RSAFromXml(success, invalidToken);
+            }
+            catch (FormatException ex)
+            {
+                return invalidToken(ex.Message);
+            }
+        }
+
+        public static TResult RSAFromXml<TResult>(this string xml,
+            Func<RSACryptoServiceProvider, TResult> success,
+            Func<string, TResult> invalidToken)
+        {
+            var rsaProvider = new RSACryptoServiceProvider();
+            try
+            {
+                rsaProvider.FromXmlString(xml);
+                return success(rsaProvider);
+            }
+            catch (CryptographicException ex)
+            {
+                return invalidToken(ex.Message);
+            }
         }
 
         public static TResult Generate<TResult>(Func<string, string, TResult> success)

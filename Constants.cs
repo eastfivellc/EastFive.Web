@@ -64,6 +64,5 @@ namespace EastFive.Security
         // Voucher tools
         public const string CredentialProviderVoucherKey = "EastFive.Security.CredentialProvider.Voucher.Key";
         public const string CredentialProviderVoucherProviderId = "EastFive.Security.CredentialProvider.Voucher.Provider";
-
     }
 }

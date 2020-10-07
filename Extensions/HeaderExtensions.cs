@@ -4,9 +4,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using BlackBarLabs.Security.Tokens;
 using System.Configuration;
+
 using EastFive.Extensions;
+using EastFive.Security.Tokens;
 
 namespace EastFive.Web
 {
