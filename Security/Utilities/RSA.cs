@@ -46,6 +46,15 @@ namespace EastFive.Security
             if (string.IsNullOrWhiteSpace(secretAsRSAXmlBase64))
                 return missingConfigurationSetting(configSettingName);
 
+            return FromString(secretAsRSAXmlBase64,
+                success,
+                (why) => invalidConfigurationSetting(configSettingName, why));
+        }
+
+        public static TResult FromString<TResult>(string secretAsRSAXmlBase64,
+            Func<RSACryptoServiceProvider, TResult> success,
+            Func<string, TResult> invalidConfigurationSetting)
+        {
             try
             {
                 var bytes = Convert.FromBase64String(secretAsRSAXmlBase64);
@@ -58,12 +67,12 @@ namespace EastFive.Security
                 }
                 catch (CryptographicException ex)
                 {
-                    return invalidConfigurationSetting(configSettingName, ex.Message);
+                    return invalidConfigurationSetting(ex.Message);
                 }
             }
             catch (FormatException ex)
             {
-                return invalidConfigurationSetting(configSettingName, ex.Message);
+                return invalidConfigurationSetting(ex.Message);
             }
         }
 

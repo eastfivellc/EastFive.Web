@@ -47,6 +47,28 @@ namespace EastFive.Security
                 invalidConfigurationSetting);
         }
 
+        public static TResult GenerateUrlToken<TResult>(Guid authId, DateTime validUntilUtc,
+                string trustedVoucherPrivateKeyBase64,
+            Func<string, TResult> success,
+            Func<string, TResult> onInvalidKey)
+        {
+            byte[] signatureData;
+            var hashedData = ComputeHashData(authId, validUntilUtc, out signatureData);
+
+            return RSA.FromString(trustedVoucherPrivateKeyBase64,
+                trustedVoucherPrivateKey =>
+                {
+                    var signature = trustedVoucherPrivateKey.SignHash(
+                                hashedData, CryptoConfig.MapNameToOID("SHA256"));
+
+                    var compactHash = signature.SHA256Hash();
+                    var tokenBytes = signatureData.Concat(compactHash).ToArray();
+                    var token = System.Web.HttpServerUtility.UrlTokenEncode(tokenBytes);
+                    return success(token);
+                },
+                (why) => onInvalidKey(why));
+        }
+
         public static TResult GenerateBytes<TResult>(Guid authId, DateTime validUntilUtc,
             Func<byte[], TResult> success,
             Func<string, TResult> missingConfigurationSetting,
