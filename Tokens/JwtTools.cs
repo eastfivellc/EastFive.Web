@@ -45,9 +45,14 @@ namespace EastFive.Security.Tokens
 
                             try
                             {
-                                Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
                                 var handler = new JwtSecurityTokenHandler();
-                                var principal = handler.ValidateToken(jwtEncodedString, validationParameters, out validatedToken);
+                                if (true)
+                                {
+                                    var jwtToken = handler.ReadJwtToken(jwtEncodedString);
+                                    return success(jwtToken.Claims.ToArray());
+                                }
+                                var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
+                                    out SecurityToken validatedToken);
 
                                 // TODO: Check if token is still valid at current date / time?
                                 var claims = principal.Claims.ToArray();

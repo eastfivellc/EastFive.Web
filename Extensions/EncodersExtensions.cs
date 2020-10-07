@@ -1,4 +1,6 @@
-﻿#nullable enable
+﻿// From: https://github.com/dotnet/aspnetcore/blob/master/src/Shared/WebEncoders/WebEncoders.cs to avoid many nugets
+
+#nullable enable
 using System;
 using System.Buffers;
 using System.Diagnostics;
