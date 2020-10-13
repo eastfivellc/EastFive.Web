@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BlackBarLabs.Web;
 using EastFive.Security.Crypto;
+using EastFive.Web.Configuration;
 
 namespace EastFive.Security
 {
@@ -42,16 +43,34 @@ namespace EastFive.Security
             Func<string, TResult> missingConfigurationSetting,
             Func<string, string, TResult> invalidConfigurationSetting)
         {
-            var secretAsRSAXmlBase64 = ConfigurationContext.Instance.AppSettings[configSettingName];
-            if (string.IsNullOrWhiteSpace(secretAsRSAXmlBase64))
-                return missingConfigurationSetting(configSettingName);
+            return configSettingName.ConfigurationBase64Bytes(
+                secretAsRSAXmlBytes =>
+                {
+                    var xml = Encoding.ASCII.GetString(secretAsRSAXmlBytes);
+                    var rsaProvider = new RSACryptoServiceProvider();
+                    try
+                    {
+                        rsaProvider.FromXmlString(xml);
+                        return success(rsaProvider);
+                    }
+                    catch (CryptographicException ex)
+                    {
+                        return invalidConfigurationSetting(
+                            configSettingName, ex.Message);
+                    }
+                },
+                onFailure: why => invalidConfigurationSetting(
+                    configSettingName, why),
+                () => missingConfigurationSetting(configSettingName));
+            //if (string.IsNullOrWhiteSpace(secretAsRSAXmlBase64))
+            //    return missingConfigurationSetting(configSettingName);
 
-            return FromString(secretAsRSAXmlBase64,
-                success,
-                (why) => invalidConfigurationSetting(configSettingName, why));
+            //return FromString(secretAsRSAXmlBase64,
+            //    success,
+            //    (why) => invalidConfigurationSetting(configSettingName, why));
         }
 
-        public static TResult FromString<TResult>(string secretAsRSAXmlBase64,
+        public static TResult FromBase64String<TResult>(string secretAsRSAXmlBase64,
             Func<RSACryptoServiceProvider, TResult> success,
             Func<string, TResult> invalidConfigurationSetting)
         {

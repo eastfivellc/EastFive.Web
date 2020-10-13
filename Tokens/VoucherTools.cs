@@ -55,7 +55,7 @@ namespace EastFive.Security
             byte[] signatureData;
             var hashedData = ComputeHashData(authId, validUntilUtc, out signatureData);
 
-            return RSA.FromString(trustedVoucherPrivateKeyBase64,
+            return RSA.FromBase64String(trustedVoucherPrivateKeyBase64,
                 trustedVoucherPrivateKey =>
                 {
                     var signature = trustedVoucherPrivateKey.SignHash(
