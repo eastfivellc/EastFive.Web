@@ -69,6 +69,22 @@ namespace EastFive.Security
             }
         }
 
+        public static TResult FromBase64String<TResult>(string secretAsRSAXmlBase64,
+            Func<RSACryptoServiceProvider, TResult> success,
+            Func<string, TResult> invalidToken)
+        {
+            try
+            {
+                var bytes = Convert.FromBase64String(secretAsRSAXmlBase64);
+                var xml = Encoding.ASCII.GetString(bytes);
+                return xml.RSAFromXml(success, invalidToken);
+            }
+            catch (FormatException ex)
+            {
+                return invalidToken(ex.Message);
+            }
+        }
+
         public static TResult RSAFromXml<TResult>(this string xml,
             Func<RSACryptoServiceProvider, TResult> success,
             Func<string, TResult> invalidToken)

@@ -134,6 +134,23 @@ namespace EastFive.Web.Configuration
                 onNotSpecified: onNotSpecified);
         }
 
+        public static TResult ConfigurationLong<TResult>(this string key,
+            Func<long, TResult> onParsed,
+            Func<string, TResult> onFailure = default,
+            Func<TResult> onNotSpecified = default)
+        {
+            return ConfigurationBase<long, TResult>(key,
+                (keyValue, failureCallback) =>
+                {
+                    if (long.TryParse(keyValue, out long longValue))
+                        return onParsed(longValue);
+
+                    return failureCallback("Could not evaluate double.");
+                },
+                onFailure: onFailure,
+                onNotSpecified: onNotSpecified);
+        }
+
         public static TResult ConfigurationGuid<TResult>(this string key,
             Func<Guid, TResult> onParsed,
             Func<string, TResult> onFailure = default,
