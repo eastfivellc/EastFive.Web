@@ -43,6 +43,7 @@ namespace EastFive.Security
         public const string TokenScope = "EastFive.Security.Token.Scope";
         public const string TokenIssuer = "EastFive.Security.Token.Issuer";
         public const string TokenKey = "EastFive.Security.Token.Key";
+        public const string TokenAlgorithm = "EastFive.Security.Token.Algorithm";
 
         // Voucher tools
         public const string CredentialProviderVoucherKey = "EastFive.Security.CredentialProvider.Voucher.Key";
