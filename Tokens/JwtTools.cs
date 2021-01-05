@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 
 using Microsoft.IdentityModel.Tokens;
 
+using EastFive;
+using EastFive.Extensions;
 using EastFive.Linq;
 using EastFive.Security;
 using EastFive.Security.Tokens;
 using EastFive.Web.Configuration;
-using EastFive.Extensions;
 
 namespace EastFive.Security.Tokens
 {
@@ -92,6 +93,45 @@ namespace EastFive.Security.Tokens
                 () => missingConfigurationSetting(configNameOfRsaKeyToValidateAgainst),
                 (issue) => invalidConfigurationSetting(
                     configNameOfRsaKeyToValidateAgainst, issue));
+        }
+
+        public static TResult CreateToken<TResult>(Uri scope,
+            DateTime issued, TimeSpan duration,
+            IEnumerable<Claim> claims,
+            Func<string, TResult> tokenCreated,
+            Func<string, TResult> missingConfigurationSetting,
+            Func<string, string, TResult> invalidConfigurationSetting,
+            string configNameOfIssuer = EastFive.Security.AppSettings.TokenIssuer,
+            string configNameOfRSAKey = EastFive.Security.AppSettings.TokenKey,
+            string configNameOfRSAAlgorithm = EastFive.Security.AppSettings.TokenAlgorithm,
+            IEnumerable<KeyValuePair<string, string>> tokenHeaders = default)
+        {
+            return RSA.FromConfig(configNameOfRSAKey,
+                (rsaProvider) =>
+                {
+                    return configNameOfIssuer.ConfigurationString(
+                        issuer =>
+                        {
+                            if (string.IsNullOrWhiteSpace(issuer))
+                                return missingConfigurationSetting(configNameOfIssuer);
+
+                            return configNameOfRSAAlgorithm.ConfigurationString(
+                                algorithm =>
+                                {
+                                    if (string.IsNullOrWhiteSpace(algorithm))
+                                        return missingConfigurationSetting(configNameOfRSAAlgorithm);
+
+                                    var jwt = rsaProvider.JwtToken(issuer, scope, claims,
+                                        issued, duration, algorithm, tokenHeaders);
+                                    return tokenCreated(jwt);
+                                },
+                                why => missingConfigurationSetting(configNameOfRSAAlgorithm));
+                        },
+                        (why) => missingConfigurationSetting(configNameOfIssuer));
+
+                },
+                (issue) => invalidConfigurationSetting(
+                    configNameOfRSAKey, issue));
         }
 
         public static TResult ParseToken<TResult>(
@@ -210,7 +250,8 @@ namespace EastFive.Security.Tokens
                 (rsaProvider) =>
                 {
                     var token = rsaProvider.JwtToken(issuer, scope, claims,
-                        issued, duration);
+                        issued, duration,
+                        Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature);
                     return tokenCreated(token);
                 },
                 onInvalidSecret);
@@ -219,14 +260,19 @@ namespace EastFive.Security.Tokens
         public static string JwtToken(this System.Security.Cryptography.RSACryptoServiceProvider rsaProvider,
             string issuer, Uri scope,
             IEnumerable<Claim> claims,
-            DateTime issued, TimeSpan duration)
+            DateTime issued, TimeSpan duration,
+            string algorithm, 
+            IEnumerable<KeyValuePair<string, string>> tokenHeaders = default)
         {
             var securityKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider);
 
             var signature = new Microsoft.IdentityModel.Tokens.SigningCredentials(
-                securityKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature);
+                securityKey, algorithm);
             var expires = (issued + duration);
             var token = new JwtSecurityToken(issuer, scope.AbsoluteUri, claims, issued, expires, signature);
+            foreach (var kvp in tokenHeaders.NullToEmpty())
+                token.Header.Add(kvp.Key, kvp.Value);
+
             var handler = new JwtSecurityTokenHandler();
             var jwt = handler.WriteToken(token);
             return jwt;
@@ -251,7 +297,7 @@ namespace EastFive.Security.Tokens
                                 return missingConfigurationSetting(configNameOfIssuer);
 
                             var jwt = rsaProvider.JwtToken(issuer, scope, claims,
-                                issued, duration);
+                                issued, duration, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature);
                             return tokenCreated(jwt);
                         },
                         missingConfigurationSetting);

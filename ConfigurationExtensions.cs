@@ -191,5 +191,26 @@ namespace EastFive.Web.Configuration
                 onFailure: onFailure,
                 onNotSpecified: onNotSpecified);
         }
+
+        public static TResult ConfigurationJson<TConfig, TResult>(this string key,
+            Func<TConfig, TResult> onParsed,
+            Func<string, TResult> onFailure = default,
+            Func<TResult> onNotSpecified = default)
+        {
+            return ConfigurationBase<string, TResult>(key,
+                (keyValue, failureCallback) =>
+                {
+                    try
+                    {
+                        var obj = Newtonsoft.Json.JsonConvert.DeserializeObject<TConfig>(keyValue);
+                        return onParsed(obj);
+                    } catch(Exception ex)
+                    {
+                        return onFailure(ex.Message);
+                    }
+                },
+                onFailure: onFailure,
+                onNotSpecified: onNotSpecified);
+        }
     }
 }

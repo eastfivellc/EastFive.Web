@@ -60,6 +60,7 @@ namespace EastFive.Security
             PrivateRepositoryOnly = true,
             Location = "Generated RSA key (tool available in Admin Portal)")]
         public const string TokenKey = "EastFive.Security.Token.Key";
+        public const string TokenAlgorithm = "EastFive.Security.Token.Algorithm";
 
         // Voucher tools
         public const string CredentialProviderVoucherKey = "EastFive.Security.CredentialProvider.Voucher.Key";
