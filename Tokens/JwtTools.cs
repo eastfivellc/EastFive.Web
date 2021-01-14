@@ -106,7 +106,7 @@ namespace EastFive.Security.Tokens
             string configNameOfRSAAlgorithm = EastFive.Security.AppSettings.TokenAlgorithm,
             IEnumerable<KeyValuePair<string, string>> tokenHeaders = default)
         {
-            return RSA.FromConfig(configNameOfRSAKey,
+            return RSA.RSAFromConfig(configNameOfRSAKey,
                 (rsaProvider) =>
                 {
                     return configNameOfIssuer.ConfigurationString(
@@ -115,21 +115,22 @@ namespace EastFive.Security.Tokens
                             if (string.IsNullOrWhiteSpace(issuer))
                                 return missingConfigurationSetting(configNameOfIssuer);
 
-                            return configNameOfRSAAlgorithm.ConfigurationString(
+                            var algorithm = configNameOfRSAAlgorithm.ConfigurationString(
                                 algorithm =>
                                 {
                                     if (string.IsNullOrWhiteSpace(algorithm))
-                                        return missingConfigurationSetting(configNameOfRSAAlgorithm);
-
-                                    var jwt = rsaProvider.JwtToken(issuer, scope, claims,
-                                        issued, duration, algorithm, tokenHeaders);
-                                    return tokenCreated(jwt);
+                                        return Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature;
+                                    return algorithm;
                                 },
-                                why => missingConfigurationSetting(configNameOfRSAAlgorithm));
+                                why => Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature);
+                            var jwt = rsaProvider.JwtToken(issuer, scope, claims,
+                                        issued, duration, algorithm, tokenHeaders);
+                            return tokenCreated(jwt);
                         },
                         (why) => missingConfigurationSetting(configNameOfIssuer));
 
                 },
+                () => missingConfigurationSetting("missing"),
                 (issue) => invalidConfigurationSetting(
                     configNameOfRSAKey, issue));
         }
@@ -246,7 +247,7 @@ namespace EastFive.Security.Tokens
             Func<string, TResult> tokenCreated,
             Func<string, TResult> onInvalidSecret)
         {
-            return RSA.FromConfig(secretAsRSAXmlBase64,
+            return RSA.RSAFromBase64(secretAsRSAXmlBase64,
                 (rsaProvider) =>
                 {
                     var token = rsaProvider.JwtToken(issuer, scope, claims,
