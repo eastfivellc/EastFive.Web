@@ -1,5 +1,15 @@
+<<<<<<< HEAD
 ﻿using System;
 using System.Collections;
+=======
+﻿using BlackBarLabs.Web;
+using EastFive.Linq;
+using EastFive.Security;
+using EastFive.Security.Tokens;
+using EastFive.Web.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+>>>>>>> 58cad292d01a244f208b7680da17252f4ff7677d
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -114,7 +124,6 @@ namespace EastFive.Security.Tokens
                         {
                             if (string.IsNullOrWhiteSpace(issuer))
                                 return missingConfigurationSetting(configNameOfIssuer);
-
                             var algorithm = configNameOfRSAAlgorithm.ConfigurationString(
                                 algorithm =>
                                 {
