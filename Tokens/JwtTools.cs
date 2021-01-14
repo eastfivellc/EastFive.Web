@@ -2,6 +2,7 @@
 using EastFive.Linq;
 using EastFive.Security;
 using EastFive.Security.Tokens;
+using EastFive.Web.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -139,7 +140,9 @@ namespace BlackBarLabs.Security.Tokens
                     if (string.IsNullOrWhiteSpace(issuer))
                         return missingConfigurationSetting(configNameOfIssuer);
 
-                    var algorithm = ConfigurationContext.Instance.AppSettings[configNameOfRSAAlgorithm];
+                    var algorithm = configNameOfRSAAlgorithm.ConfigurationString(
+                        alg => alg,
+                        (why) => default);
                     if (string.IsNullOrWhiteSpace(algorithm))
                         return missingConfigurationSetting(configNameOfRSAAlgorithm);
 
