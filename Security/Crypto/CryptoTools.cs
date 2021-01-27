@@ -36,9 +36,11 @@ namespace EastFive.Security.Crypto
         public static SecurityToken GetRsaSecurityToken(string base64EncodedValue)
         {
             var xml = UrlBase64Decode(base64EncodedValue);
-            var rsa = new RSACryptoServiceProvider();
-            rsa.FromXmlString(xml);
-            return new RsaSecurityToken(rsa);
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                rsa.FromXmlString(xml);
+                return new RsaSecurityToken(rsa);
+            }
         }
 
         public delegate T GenerateHashDelegate<T>(string salt, string hash);

@@ -14,11 +14,12 @@ namespace EastFive.Security.Crypto
         public static byte[] ComputeHashData(string data, out byte[] signatureData)
         {
             signatureData = Encoding.ASCII.GetBytes(data);
-            var hash = new SHA256Managed();
-            var hashedData = hash.ComputeHash(signatureData);
-            return hashedData;
+            using (var algorithm = new SHA256Managed())
+            {
+                var hashedData = algorithm.ComputeHash(signatureData);
+                return hashedData;
+            }
         }
-
 
         public static byte[] RSAEncrypt(this byte[] DataToEncrypt, RSACryptoServiceProvider rsaProvider)
         {

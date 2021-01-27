@@ -64,57 +64,60 @@ namespace BlackBarLabs.Security.Tokens
             string configNameOfRsaKeyToValidateAgainst = EastFive.Security.AppSettings.TokenKey)
         {
             var result = RSA.FromConfig(configNameOfRsaKeyToValidateAgainst,
-                rsaProvider =>
+                (rsaProvider) =>
                 {
-                    var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuerToValidateAgainst];
-                    if (string.IsNullOrEmpty(issuer))
-                        return missingConfigurationSetting(configNameOfIssuerToValidateAgainst);
+                    using (rsaProvider)
+                    {
+                        var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuerToValidateAgainst];
+                        if (string.IsNullOrEmpty(issuer))
+                            return missingConfigurationSetting(configNameOfIssuerToValidateAgainst);
 
-                    var validationParameters = new TokenValidationParameters()
-                    {
-                        ValidateAudience = false,
-                        ValidIssuer = issuer,
-                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider),
-                        RequireExpirationTime = true,
-                    };
+                        var validationParameters = new TokenValidationParameters()
+                        {
+                            ValidateAudience = false,
+                            ValidIssuer = issuer,
+                            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider),
+                            RequireExpirationTime = true,
+                        };
 
-                    try
-                    {
-                        Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
-                        var handler = new JwtSecurityTokenHandler();
-                        var principal = handler.ValidateToken(jwtEncodedString, validationParameters, out validatedToken);
-                        
-                        // TODO: Check if token is still valid at current date / time?
-                        var claims = principal.Claims.ToArray();
+                        try
+                        {
+                            Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
+                            var handler = new JwtSecurityTokenHandler();
+                            var principal = handler.ValidateToken(jwtEncodedString, validationParameters, out validatedToken);
 
-                        return EastFive.Web.Configuration.Settings.GetDateTime(
-                                EastFive.Web.AppSettings.TokenForceRefreshTime,
-                            (notValidBeforeTime) =>
-                            {
-                                if (validatedToken.ValidFrom < notValidBeforeTime)
-                                    return EastFive.Web.Configuration.Settings.GetString(
-                                            EastFive.Web.AppSettings.TokenForceRefreshMessage,
-                                        (message) => invalidToken(message),
-                                        (why) => invalidToken(why));
-                                return success(claims);
-                            },
-                            (why) => success(claims));
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        return invalidToken(ex.Message);
-                    }
-                    catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException ex)
-                    {
-                        return invalidToken(ex.Message);
-                    }
-                    catch (Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException ex)
-                    {
-                        return invalidToken(ex.Message);
-                    }
-                    catch (Microsoft.IdentityModel.Tokens.SecurityTokenException ex)
-                    {
-                        return invalidToken(ex.Message);
+                            // TODO: Check if token is still valid at current date / time?
+                            var claims = principal.Claims.ToArray();
+
+                            return EastFive.Web.Configuration.Settings.GetDateTime(
+                                    EastFive.Web.AppSettings.TokenForceRefreshTime,
+                                (notValidBeforeTime) =>
+                                {
+                                    if (validatedToken.ValidFrom < notValidBeforeTime)
+                                        return EastFive.Web.Configuration.Settings.GetString(
+                                                EastFive.Web.AppSettings.TokenForceRefreshMessage,
+                                            (message) => invalidToken(message),
+                                            (why) => invalidToken(why));
+                                    return success(claims);
+                                },
+                                (why) => success(claims));
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            return invalidToken(ex.Message);
+                        }
+                        catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException ex)
+                        {
+                            return invalidToken(ex.Message);
+                        }
+                        catch (Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException ex)
+                        {
+                            return invalidToken(ex.Message);
+                        }
+                        catch (Microsoft.IdentityModel.Tokens.SecurityTokenException ex)
+                        {
+                            return invalidToken(ex.Message);
+                        }
                     }
                 },
                 missingConfigurationSetting,
@@ -136,19 +139,22 @@ namespace BlackBarLabs.Security.Tokens
             return RSA.FromConfig(configNameOfRSAKey,
                 (rsaProvider) =>
                 {
-                    var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuer];
-                    if (string.IsNullOrWhiteSpace(issuer))
-                        return missingConfigurationSetting(configNameOfIssuer);
+                    using (rsaProvider)
+                    {
+                        var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuer];
+                        if (string.IsNullOrWhiteSpace(issuer))
+                            return missingConfigurationSetting(configNameOfIssuer);
 
-                    var algorithm = configNameOfRSAAlgorithm.ConfigurationString(
-                        alg => alg,
-                        (why) => default);
-                    if (string.IsNullOrWhiteSpace(algorithm))
-                        return missingConfigurationSetting(configNameOfRSAAlgorithm);
+                        var algorithm = configNameOfRSAAlgorithm.ConfigurationString(
+                            alg => alg,
+                            (why) => default);
+                        if (string.IsNullOrWhiteSpace(algorithm))
+                            return missingConfigurationSetting(configNameOfRSAAlgorithm);
 
-                    var jwt = rsaProvider.JwtToken(issuer, scope, claims,
-                        issued, duration, algorithm, tokenHeaders);
-                    return tokenCreated(jwt);
+                        var jwt = rsaProvider.JwtToken(issuer, scope, claims,
+                            issued, duration, algorithm, tokenHeaders);
+                        return tokenCreated(jwt);
+                    }
                 },
                 missingConfigurationSetting,
                 invalidConfigurationSetting);
@@ -184,57 +190,60 @@ namespace EastFive.Security.Tokens
             string configNameOfRsaKeyToValidateAgainst = EastFive.Security.AppSettings.TokenKey)
         {
             var result = RSA.FromConfig(configNameOfRsaKeyToValidateAgainst,
-                rsaProvider =>
+                (rsaProvider) =>
                 {
-                    var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuerToValidateAgainst];
-                    if (string.IsNullOrEmpty(issuer))
-                        return missingConfigurationSetting(configNameOfIssuerToValidateAgainst);
+                    using (rsaProvider)
+                    {
+                        var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuerToValidateAgainst];
+                        if (string.IsNullOrEmpty(issuer))
+                            return missingConfigurationSetting(configNameOfIssuerToValidateAgainst);
 
-                    var validationParameters = new TokenValidationParameters()
-                    {
-                        ValidateAudience = false,
-                        ValidIssuer = issuer,
-                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider),
-                        RequireExpirationTime = true,
-                    };
+                        var validationParameters = new TokenValidationParameters()
+                        {
+                            ValidateAudience = false,
+                            ValidIssuer = issuer,
+                            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider),
+                            RequireExpirationTime = true,
+                        };
 
-                    try
-                    {
-                        Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
-                        var handler = new JwtSecurityTokenHandler();
-                        var principal = handler.ValidateToken(jwtEncodedString, validationParameters, out validatedToken);
+                        try
+                        {
+                            Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
+                            var handler = new JwtSecurityTokenHandler();
+                            var principal = handler.ValidateToken(jwtEncodedString, validationParameters, out validatedToken);
 
-                        // TODO: Check if token is still valid at current date / time?
-                        var claims = principal.Claims.ToArray();
+                            // TODO: Check if token is still valid at current date / time?
+                            var claims = principal.Claims.ToArray();
 
-                        return EastFive.Web.Configuration.Settings.GetDateTime(
-                                EastFive.Web.AppSettings.TokenForceRefreshTime,
-                            (notValidBeforeTime) =>
-                            {
-                                if (validatedToken.ValidFrom < notValidBeforeTime)
-                                    return EastFive.Web.Configuration.Settings.GetString(
-                                            EastFive.Web.AppSettings.TokenForceRefreshMessage,
-                                        (message) => invalidToken(message),
-                                        (why) => invalidToken(why));
-                                return success(claims);
-                            },
-                            (why) => success(claims));
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        return invalidToken(ex.Message);
-                    }
-                    catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException ex)
-                    {
-                        return invalidToken(ex.Message);
-                    }
-                    catch (Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException ex)
-                    {
-                        return invalidToken(ex.Message);
-                    }
-                    catch (Microsoft.IdentityModel.Tokens.SecurityTokenException ex)
-                    {
-                        return invalidToken(ex.Message);
+                            return EastFive.Web.Configuration.Settings.GetDateTime(
+                                    EastFive.Web.AppSettings.TokenForceRefreshTime,
+                                (notValidBeforeTime) =>
+                                {
+                                    if (validatedToken.ValidFrom < notValidBeforeTime)
+                                        return EastFive.Web.Configuration.Settings.GetString(
+                                                EastFive.Web.AppSettings.TokenForceRefreshMessage,
+                                            (message) => invalidToken(message),
+                                            (why) => invalidToken(why));
+                                    return success(claims);
+                                },
+                                (why) => success(claims));
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            return invalidToken(ex.Message);
+                        }
+                        catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException ex)
+                        {
+                            return invalidToken(ex.Message);
+                        }
+                        catch (Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException ex)
+                        {
+                            return invalidToken(ex.Message);
+                        }
+                        catch (Microsoft.IdentityModel.Tokens.SecurityTokenException ex)
+                        {
+                            return invalidToken(ex.Message);
+                        }
                     }
                 },
                 missingConfigurationSetting,
@@ -254,10 +263,13 @@ namespace EastFive.Security.Tokens
             return RSA.FromConfig(secretAsRSAXmlBase64,
                 (rsaProvider) =>
                 {
-                    var token = rsaProvider.JwtToken(issuer, scope, claims,
-                        issued, duration,
-                        Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature);
-                    return tokenCreated(token);
+                    using (rsaProvider)
+                    {
+                        var token = rsaProvider.JwtToken(issuer, scope, claims,
+                            issued, duration,
+                            Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature);
+                        return tokenCreated(token);
+                    }
                 },
                 onInvalidSecret);
         }
