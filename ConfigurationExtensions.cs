@@ -197,20 +197,32 @@ namespace EastFive.Web.Configuration
             Func<string, TResult> onFailure = default,
             Func<TResult> onNotSpecified = default)
         {
-            return ConfigurationBase<string, TResult>(key,
-                (keyValue, failureCallback) =>
+            var keyValue = GetJson();
+            try
+            {
+                var obj = Newtonsoft.Json.JsonConvert.DeserializeObject<TConfig>(keyValue);
+                return onParsed(obj);
+            } catch(Exception ex)
+            {
+                return onFailure(ex.Message);
+            }
+
+            string GetJson()
+            {
+                if (typeof(TConfig).IsArray)
                 {
-                    try
-                    {
-                        var obj = Newtonsoft.Json.JsonConvert.DeserializeObject<TConfig>(keyValue);
-                        return onParsed(obj);
-                    } catch(Exception ex)
-                    {
-                        return onFailure(ex.Message);
-                    }
-                },
-                onFailure: onFailure,
-                onNotSpecified: onNotSpecified);
+                    var dictArray = configuration
+                        .GetSection(key)
+                        .Get<Dictionary<string, object>[]>();
+                    
+                    return Newtonsoft.Json.JsonConvert.SerializeObject(dictArray);
+                }
+
+                var dict = configuration
+                    .GetSection(key)
+                    .Get<Dictionary<string, object>[]>();
+                return Newtonsoft.Json.JsonConvert.SerializeObject(dict);
+            }
         }
     }
 }
