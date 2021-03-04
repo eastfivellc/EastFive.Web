@@ -59,6 +59,48 @@ namespace EastFive.Security
                 return invalidToken(ex.Message);
             }
         }
+        
+        public static TResult FromConfig<TResult>(string configSettingName,
+            Func<RSACryptoServiceProvider, TResult> success,
+            Func<string, TResult> missingConfigurationSetting,
+            Func<string, string, TResult> invalidConfigurationSetting)
+        {
+            return configSettingName.ConfigurationBase64Bytes(
+                secretAsRSAXmlBytes =>
+                {
+                    var xml = Encoding.ASCII.GetString(secretAsRSAXmlBytes);
+                    var rsaProvider = new RSACryptoServiceProvider();
+                    try
+                    {
+                        rsaProvider.FromXmlString(xml);
+                        return success(rsaProvider);
+                    }
+                    catch (CryptographicException ex)
+                    {
+                        return invalidConfigurationSetting(
+                            configSettingName, ex.Message);
+                    }
+                },
+                onFailure: why => invalidConfigurationSetting(
+                    configSettingName, why),
+                () => missingConfigurationSetting(configSettingName));
+        }
+
+        public static TResult FromBase64String<TResult>(string secretAsRSAXmlBase64,
+            Func<RSACryptoServiceProvider, TResult> success,
+            Func<string, TResult> invalidToken)
+        {
+            var rsaProvider = new RSACryptoServiceProvider();
+            try
+            {
+                rsaProvider.FromXmlString(secretAsRSAXmlBase64);
+                return success(rsaProvider);
+            }
+            catch (CryptographicException ex)
+            {
+                return invalidToken(ex.Message);
+            }
+        }
 
         public static TResult Generate<TResult>(Func<string, string, TResult> success)
         {
@@ -68,19 +110,20 @@ namespace EastFive.Security
                 Flags = CspProviderFlags.UseArchivableKey,
                 KeyNumber = (int)KeyNumber.Exchange,
             };
-            var rsaProvider = new RSACryptoServiceProvider(2048, cspParams);
+            using (var rsaProvider = new RSACryptoServiceProvider(2048, cspParams))
+            {
+                // Export public key
+                var publicKey = Convert.ToBase64String(
+                    Encoding.ASCII.GetBytes(
+                        rsaProvider.ToXmlString(false)));
 
-            // Export public key
-            var publicKey = Convert.ToBase64String(
-                Encoding.ASCII.GetBytes(
-                    rsaProvider.ToXmlString(false)));
+                // Export private/public key pair
+                var privateKey = Convert.ToBase64String(
+                    Encoding.ASCII.GetBytes(
+                        rsaProvider.ToXmlString(true)));
 
-            // Export private/public key pair
-            var privateKey = Convert.ToBase64String(
-                Encoding.ASCII.GetBytes(
-                    rsaProvider.ToXmlString(true)));
-
-            return success(publicKey, privateKey);
+                return success(publicKey, privateKey);
+            }
         }
     }
 }
