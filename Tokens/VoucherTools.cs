@@ -36,13 +36,16 @@ namespace EastFive.Security
             return AppSettings.CredentialProviderVoucherKey.RSAFromConfig(
                 (trustedVoucherPrivateKey) =>
                 {
-                    var signature = trustedVoucherPrivateKey.SignHash(
+                    using (trustedVoucherPrivateKey)
+                    {
+                        var signature = trustedVoucherPrivateKey.SignHash(
                         hashedData, CryptoConfig.MapNameToOID("SHA256"));
 
-                    var compactHash = signature.SHA256Hash();
-                    var tokenBytes = signatureData.Concat(compactHash).ToArray();
-                    var token = tokenBytes.Base64UrlEncode(); //  System.Web.HttpServerUtility.UrlTokenEncode();
-                    return success(token);
+                        var compactHash = signature.SHA256Hash();
+                        var tokenBytes = signatureData.Concat(compactHash).ToArray();
+                        var token = tokenBytes.Base64UrlEncode(); //  System.Web.HttpServerUtility.UrlTokenEncode();
+                        return success(token);
+                    }
                 },
                 () => missingConfigurationSetting(AppSettings.CredentialProviderVoucherKey),
                 (issue) => invalidConfigurationSetting(
@@ -60,13 +63,16 @@ namespace EastFive.Security
             return trustedVoucherPrivateKeyBase64.RSAFromBase64(
                 trustedVoucherPrivateKey =>
                 {
-                    var signature = trustedVoucherPrivateKey.SignHash(
-                                hashedData, CryptoConfig.MapNameToOID("SHA256"));
+                    using (trustedVoucherPrivateKey)
+                    {
+                        var signature = trustedVoucherPrivateKey.SignHash(
+                                    hashedData, CryptoConfig.MapNameToOID("SHA256"));
 
-                    var compactHash = signature.SHA256Hash();
-                    var tokenBytes = signatureData.Concat(compactHash).ToArray();
-                    var token = tokenBytes.Base64UrlEncode(); // System.Web.HttpServerUtility.UrlTokenEncode(tokenBytes);
-                    return success(token);
+                        var compactHash = signature.SHA256Hash();
+                        var tokenBytes = signatureData.Concat(compactHash).ToArray();
+                        var token = tokenBytes.Base64UrlEncode(); // System.Web.HttpServerUtility.UrlTokenEncode(tokenBytes);
+                        return success(token);
+                    }
                 },
                 (why) => onInvalidKey(why));
         }
@@ -82,10 +88,13 @@ namespace EastFive.Security
             return AppSettings.CredentialProviderVoucherKey.RSAFromConfig(
                 (trustedVoucherPrivateKey) =>
                 {
-                    var signature = trustedVoucherPrivateKey.SignHash(hashedData, CryptoConfig.MapNameToOID("SHA256"));
+                    using (trustedVoucherPrivateKey)
+                    {
+                        var signature = trustedVoucherPrivateKey.SignHash(hashedData, CryptoConfig.MapNameToOID("SHA256"));
 
-                    var tokenBytes = signatureData.Concat(signature).ToArray();
-                    return success(tokenBytes);
+                        var tokenBytes = signatureData.Concat(signature).ToArray();
+                        return success(tokenBytes);
+                    }
                 },
                 () => missingConfigurationSetting(AppSettings.CredentialProviderVoucherKey),
                 (issue) => invalidConfigurationSetting(
@@ -136,13 +145,16 @@ namespace EastFive.Security
             return AppSettings.CredentialProviderVoucherKey.RSAFromConfig(
                 (trustedVoucher) =>
                 {
-                    if (!trustedVoucher.VerifyHash(hashedData, CryptoConfig.MapNameToOID("SHA256"), providedSignature))
-                        return invalidSignature("Cannot verify hash - authId: " + authId +
-                           "   validUntilUtc: " + validUntilUtc +
-                           "   hashedData: " + hashedData +
-                           "   providedSignature: " + providedSignature);
+                    using (trustedVoucher)
+                    {
+                        if (!trustedVoucher.VerifyHash(hashedData, CryptoConfig.MapNameToOID("SHA256"), providedSignature))
+                            return invalidSignature("Cannot verify hash - authId: " + authId +
+                               "   validUntilUtc: " + validUntilUtc +
+                               "   hashedData: " + hashedData +
+                               "   providedSignature: " + providedSignature);
 
-                    return success(authId);
+                        return success(authId);
+                    }
                 },
                 () => missingConfigurationSetting(AppSettings.CredentialProviderVoucherKey),
                 (issue) => invalidConfigurationSetting(
@@ -204,10 +216,11 @@ namespace EastFive.Security
             var validUntilUtcData = BitConverter.GetBytes(validUntilUtc.Ticks);
             signatureData = authIdData.Concat(validUntilUtcData).ToArray();
 
-            var hash = new SHA256Managed();
-
-            var hashedData = hash.ComputeHash(signatureData);
-            return hashedData;
+            using (var algorithm = new SHA256Managed())
+            {
+                var hashedData = algorithm.ComputeHash(signatureData);
+                return hashedData;
+            }
         }
     }
 }

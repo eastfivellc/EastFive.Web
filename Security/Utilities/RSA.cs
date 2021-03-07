@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using BlackBarLabs.Web;
 using EastFive.Security.Crypto;
 using EastFive.Web.Configuration;
 
@@ -68,19 +67,20 @@ namespace EastFive.Security
                 Flags = CspProviderFlags.UseArchivableKey,
                 KeyNumber = (int)KeyNumber.Exchange,
             };
-            var rsaProvider = new RSACryptoServiceProvider(2048, cspParams);
+            using (var rsaProvider = new RSACryptoServiceProvider(2048, cspParams))
+            {
+                // Export public key
+                var publicKey = Convert.ToBase64String(
+                    Encoding.ASCII.GetBytes(
+                        rsaProvider.ToXmlString(false)));
 
-            // Export public key
-            var publicKey = Convert.ToBase64String(
-                Encoding.ASCII.GetBytes(
-                    rsaProvider.ToXmlString(false)));
+                // Export private/public key pair
+                var privateKey = Convert.ToBase64String(
+                    Encoding.ASCII.GetBytes(
+                        rsaProvider.ToXmlString(true)));
 
-            // Export private/public key pair
-            var privateKey = Convert.ToBase64String(
-                Encoding.ASCII.GetBytes(
-                    rsaProvider.ToXmlString(true)));
-
-            return success(publicKey, privateKey);
+                return success(publicKey, privateKey);
+            }
         }
     }
 }
