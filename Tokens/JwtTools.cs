@@ -234,6 +234,63 @@ namespace EastFive.Security.Tokens
                             }
                         },
                         (why) => missingConfigurationSetting(why));
+
+            //var result = RSA.FromConfig(configNameOfRsaKeyToValidateAgainst,
+            //    (rsaProvider) =>
+            //    {
+            //        using (rsaProvider)
+            //        {
+            //            var issuer = ConfigurationContext.Instance.AppSettings[configNameOfIssuerToValidateAgainst];
+            //            if (string.IsNullOrEmpty(issuer))
+            //                return missingConfigurationSetting(configNameOfIssuerToValidateAgainst);
+
+            //            var validationParameters = new TokenValidationParameters()
+            //            {
+            //                ValidateAudience = false,
+            //                ValidIssuer = issuer,
+            //                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider),
+            //                RequireExpirationTime = true,
+            //            };
+
+            //            try
+            //            {
+            //                Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
+            //                var handler = new JwtSecurityTokenHandler();
+            //                var principal = handler.ValidateToken(jwtEncodedString, validationParameters, out validatedToken);
+
+            //                // TODO: Check if token is still valid at current date / time?
+            //                var claims = principal.Claims.ToArray();
+
+            //                return EastFive.Web.Configuration.Settings.GetDateTime(
+            //                        EastFive.Web.AppSettings.TokenForceRefreshTime,
+            //                    (notValidBeforeTime) =>
+            //                    {
+            //                        if (validatedToken.ValidFrom < notValidBeforeTime)
+            //                            return EastFive.Web.Configuration.Settings.GetString(
+            //                                    EastFive.Web.AppSettings.TokenForceRefreshMessage,
+            //                                (message) => invalidToken(message),
+            //                                (why) => invalidToken(why));
+            //                        return success(claims);
+            //                    },
+            //                    (why) => success(claims));
+            //            }
+            //            catch (ArgumentException ex)
+            //            {
+            //                return invalidToken(ex.Message);
+            //            }
+            //            catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException ex)
+            //            {
+            //                return invalidToken(ex.Message);
+            //            }
+            //            catch (Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException ex)
+            //            {
+            //                return invalidToken(ex.Message);
+            //            }
+            //            catch (Microsoft.IdentityModel.Tokens.SecurityTokenException ex)
+            //            {
+            //                return invalidToken(ex.Message);
+            //            }
+            //        }
                 },
                 () => missingConfigurationSetting(configNameOfRsaKeyToValidateAgainst),
                 (issue) => invalidConfigurationSetting(

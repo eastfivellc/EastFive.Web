@@ -58,6 +58,48 @@ namespace EastFive.Security
                 return invalidToken(ex.Message);
             }
         }
+        
+        public static TResult FromConfig<TResult>(string configSettingName,
+            Func<RSACryptoServiceProvider, TResult> success,
+            Func<string, TResult> missingConfigurationSetting,
+            Func<string, string, TResult> invalidConfigurationSetting)
+        {
+            return configSettingName.ConfigurationBase64Bytes(
+                secretAsRSAXmlBytes =>
+                {
+                    var xml = Encoding.ASCII.GetString(secretAsRSAXmlBytes);
+                    var rsaProvider = new RSACryptoServiceProvider();
+                    try
+                    {
+                        rsaProvider.FromXmlString(xml);
+                        return success(rsaProvider);
+                    }
+                    catch (CryptographicException ex)
+                    {
+                        return invalidConfigurationSetting(
+                            configSettingName, ex.Message);
+                    }
+                },
+                onFailure: why => invalidConfigurationSetting(
+                    configSettingName, why),
+                () => missingConfigurationSetting(configSettingName));
+        }
+
+        public static TResult FromBase64String<TResult>(string secretAsRSAXmlBase64,
+            Func<RSACryptoServiceProvider, TResult> success,
+            Func<string, TResult> invalidToken)
+        {
+            var rsaProvider = new RSACryptoServiceProvider();
+            try
+            {
+                rsaProvider.FromXmlString(secretAsRSAXmlBase64);
+                return success(rsaProvider);
+            }
+            catch (CryptographicException ex)
+            {
+                return invalidToken(ex.Message);
+            }
+        }
 
         public static TResult Generate<TResult>(Func<string, string, TResult> success)
         {
