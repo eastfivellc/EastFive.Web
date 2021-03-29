@@ -179,7 +179,7 @@ namespace EastFive.Security.Tokens
             var result = configNameOfRsaKeyToValidateAgainst.RSAFromConfig(
                 rsaProvider =>
                 {
-                    using(rsaProvider)
+                    // using(rsaProvider)
                     return configNameOfIssuerToValidateAgainst.ConfigurationString(
                         (issuer) =>
                         {
