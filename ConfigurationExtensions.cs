@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace EastFive.Web.Configuration
 {
@@ -195,7 +196,8 @@ namespace EastFive.Web.Configuration
                 {
                     try
                     {
-                        var obj = Newtonsoft.Json.JsonConvert.DeserializeObject<TConfig>(keyValue);
+                        var decodedValue = HttpUtility.HtmlDecode(keyValue);
+                        var obj = Newtonsoft.Json.JsonConvert.DeserializeObject<TConfig>(decodedValue);
                         return onParsed(obj);
                     } catch(Exception ex)
                     {
