@@ -24,7 +24,7 @@ namespace EastFive.Web.Configuration
             var value = configuration[key];
             if (!value.IsDefaultOrNull())
                 return onFound(value);
-            
+
             var msg = $" - The configuration value for [{key}] is not specified. Please specify a string value";
             if (!onUnspecified.IsDefault())
                 return onUnspecified(msg);
@@ -79,6 +79,9 @@ namespace EastFive.Web.Configuration
                 onFailure: onFailure,
                 onNotSpecified: onNotSpecified);
         }
+
+        public static Uri ConfigurationUri(this string key)
+            => key.ConfigurationUri(v => v);
 
         public static TResult ConfigurationUri<TResult>(this string key,
             Func<Uri, TResult> onParsed,
