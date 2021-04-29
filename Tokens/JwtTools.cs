@@ -110,8 +110,8 @@ namespace EastFive.Security.Tokens
             return RSA.RSAFromConfig(configNameOfRSAKey,
                 (rsaProvider) =>
                 {
-                    using (rsaProvider)
-                    {
+                    //using (rsaProvider)
+                    //{
                         return configNameOfIssuer.ConfigurationString(
                             issuer =>
                             {
@@ -130,7 +130,7 @@ namespace EastFive.Security.Tokens
                                 return tokenCreated(jwt);
                             },
                             (why) => missingConfigurationSetting(configNameOfIssuer));
-                    }
+                    //}
                 },
                 () => missingConfigurationSetting("missing"),
                 (issue) => invalidConfigurationSetting(
