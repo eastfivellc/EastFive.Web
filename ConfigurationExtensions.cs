@@ -50,13 +50,13 @@ namespace EastFive.Web.Configuration
                             throw new ConfigurationException(key, typeof(TBase), msg);
                         });
                 },
-                (why) =>
+                onUnspecified:(why) =>
                 {
                     if (!onNotSpecified.IsDefault())
                         return onNotSpecified();
 
                     var msg = $" - The configuration value for [{key}] is not specified. Please specify a {typeof(TBase).Name} value.";
-                    if (onFailure.IsDefault())
+                    if (!onFailure.IsDefault())
                         return onFailure(msg);
 
                     throw new ConfigurationException(key, typeof(TBase), msg);
