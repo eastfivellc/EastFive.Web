@@ -14,7 +14,7 @@ namespace EastFive.Security.Crypto
         public static byte[] ComputeHashData(string data, out byte[] signatureData)
         {
             signatureData = Encoding.ASCII.GetBytes(data);
-            using (var algorithm = new SHA256Managed())
+            using (var algorithm = SHA256.Create())
             {
                 var hashedData = algorithm.ComputeHash(signatureData);
                 return hashedData;

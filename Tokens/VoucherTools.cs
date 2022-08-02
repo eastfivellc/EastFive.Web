@@ -216,7 +216,7 @@ namespace EastFive.Security
             var validUntilUtcData = BitConverter.GetBytes(validUntilUtc.Ticks);
             signatureData = authIdData.Concat(validUntilUtcData).ToArray();
 
-            using (var algorithm = new SHA256Managed())
+            using (var algorithm = SHA256.Create())
             {
                 var hashedData = algorithm.ComputeHash(signatureData);
                 return hashedData;

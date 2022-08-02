@@ -53,24 +53,24 @@ namespace EastFive.Security.Tokens
                                         var jwtToken = handler.ReadJwtToken(jwtEncodedString);
                                         return success(jwtToken.Claims.ToArray());
                                     }
-                                    var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
-                                        out SecurityToken validatedToken);
+                                //    var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
+                                //        out SecurityToken validatedToken);
 
-                                // TODO: Check if token is still valid at current date / time?
-                                var claims = principal.Claims.ToArray();
+                                //// TODO: Check if token is still valid at current date / time?
+                                //var claims = principal.Claims.ToArray();
 
-                                    return EastFive.Web.Configuration.Settings.GetDateTime(
-                                            EastFive.Web.AppSettings.TokenForceRefreshTime,
-                                        (notValidBeforeTime) =>
-                                        {
-                                            if (validatedToken.ValidFrom < notValidBeforeTime)
-                                                return EastFive.Web.Configuration.Settings.GetString(
-                                                        EastFive.Web.AppSettings.TokenForceRefreshMessage,
-                                                    (message) => invalidToken(message),
-                                                    (why) => invalidToken(why));
-                                            return success(claims);
-                                        },
-                                        (why) => success(claims));
+                                //    return EastFive.Web.Configuration.Settings.GetDateTime(
+                                //            EastFive.Web.AppSettings.TokenForceRefreshTime,
+                                //        (notValidBeforeTime) =>
+                                //        {
+                                //            if (validatedToken.ValidFrom < notValidBeforeTime)
+                                //                return EastFive.Web.Configuration.Settings.GetString(
+                                //                        EastFive.Web.AppSettings.TokenForceRefreshMessage,
+                                //                    (message) => invalidToken(message),
+                                //                    (why) => invalidToken(why));
+                                //            return success(claims);
+                                //        },
+                                //        (why) => success(claims));
                                 }
                                 catch (ArgumentException ex)
                                 {
