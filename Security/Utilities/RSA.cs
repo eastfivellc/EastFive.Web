@@ -103,6 +103,9 @@ namespace EastFive.Security
 
         public static TResult Generate<TResult>(Func<string, string, TResult> success)
         {
+            if (!OperatingSystem.IsWindows())
+                throw new NotSupportedException("OS not supported");
+            
             var cspParams = new CspParameters()
             {
                 ProviderType = 1, // PROV_RSA_FULL
