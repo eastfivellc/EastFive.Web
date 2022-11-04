@@ -1,12 +1,13 @@
-﻿using BlackBarLabs.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using EastFive.Linq;
 using EastFive;
+using EastFive.Extensions;
 
-namespace BlackBarLabs.Persistence
+namespace EastFive.Persistence
 {
     public class RollbackAsync<TFailure>
     {
@@ -46,7 +47,7 @@ namespace BlackBarLabs.Persistence
             {
                 if (default(Func<Task>) != rollback)
                     return rollback();
-                return true.ToTask();
+                return true.AsTask();
             }
         }
 
@@ -89,7 +90,7 @@ namespace BlackBarLabs.Persistence
                 },
                 async () =>
                 {
-                    return await success().ToTask();
+                    return await success().AsTask();
                 });
             return resultGlobal;
         }
@@ -136,7 +137,7 @@ namespace BlackBarLabs.Persistence
             {
                 if (default(Func<Task>) != rollback)
                     return rollback();
-                return true.ToTask();
+                return true.AsTask();
             }
         }
 
@@ -179,7 +180,7 @@ namespace BlackBarLabs.Persistence
                 async () =>
                 {
                     var successes = results.Select(result => result.SuccessResult).ToArray();
-                    return await success(successes).ToTask();
+                    return await success(successes).AsTask();
                 });
             return resultGlobal;
         }
