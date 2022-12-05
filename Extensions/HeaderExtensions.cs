@@ -13,20 +13,6 @@ namespace EastFive.Web
 {
     public static class HeaderExtensions
     {
-        //public static TResult GetAccountId<TResult>(this IEnumerable<System.Security.Claims.Claim> claims,
-        //    Func<Guid, TResult> success,
-        //    Func<TResult> authorizationClaimDoesNotExists)
-        //{
-        //    var adminClaim = claims
-        //        .FirstOrDefault((claim) => String.Compare(claim.Type, BlackBarLabs.Security.ClaimIds.Authorization) == 0);
-
-        //    if (default(System.Security.Claims.Claim) == adminClaim)
-        //        return authorizationClaimDoesNotExists();
-
-        //    var accountId = Guid.Parse(adminClaim.Value);
-        //    return success(accountId);
-        //}
-
         private const string BearerTokenPrefix = "bearer ";
 
         public static TResult GetClaimsJwtString<TResult>(this string jwtString,

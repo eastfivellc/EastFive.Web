@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Cryptography;
-
+using EastFive.Extensions;
 using EastFive.Security;
 using EastFive.Serialization;
-using EastFive.Web.Extensions;
 
 namespace EastFive.Security
 {
