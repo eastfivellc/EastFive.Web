@@ -62,6 +62,13 @@ namespace EastFive.Security
         public const string TokenKey = "EastFive.Security.Token.Key";
         public const string TokenAlgorithm = "EastFive.Security.Token.Algorithm";
 
+        [ConfigKey("Skip validation of tokens.",
+            DeploymentOverrides.Mandatory,
+            DeploymentSecurityConcern = true,
+            PrivateRepositoryOnly = false,
+            Location = "Set to true to locally debug using tokens from other servers.")]
+        public const string TokensAllValid = "EastFive.Security.Token.AllValid";
+
         // Voucher tools
         public const string CredentialProviderVoucherKey = "EastFive.Security.CredentialProvider.Voucher.Key";
         public const string CredentialProviderVoucherProviderId = "EastFive.Security.CredentialProvider.Voucher.Provider";

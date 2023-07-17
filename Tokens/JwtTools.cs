@@ -48,29 +48,35 @@ namespace EastFive.Security.Tokens
                                 try
                                 {
                                     var handler = new JwtSecurityTokenHandler();
-                                    if (true)
+
+                                    var dontValidateToken = EastFive.Security.AppSettings.TokensAllValid.ConfigurationBoolean(
+                                        v => v,
+                                        onNotSpecified: () => false);
+
+                                    if (dontValidateToken)
                                     {
                                         var jwtToken = handler.ReadJwtToken(jwtEncodedString);
                                         return success(jwtToken.Claims.ToArray());
                                     }
-                                //    var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
-                                //        out SecurityToken validatedToken);
 
-                                //// TODO: Check if token is still valid at current date / time?
-                                //var claims = principal.Claims.ToArray();
+                                    var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
+                                        out SecurityToken validatedToken);
 
-                                //    return EastFive.Web.Configuration.Settings.GetDateTime(
-                                //            EastFive.Web.AppSettings.TokenForceRefreshTime,
-                                //        (notValidBeforeTime) =>
-                                //        {
-                                //            if (validatedToken.ValidFrom < notValidBeforeTime)
-                                //                return EastFive.Web.Configuration.Settings.GetString(
-                                //                        EastFive.Web.AppSettings.TokenForceRefreshMessage,
-                                //                    (message) => invalidToken(message),
-                                //                    (why) => invalidToken(why));
-                                //            return success(claims);
-                                //        },
-                                //        (why) => success(claims));
+                                    // TODO: Check if token is still valid at current date / time?
+                                    var claims = principal.Claims.ToArray();
+
+                                    return EastFive.Web.Configuration.Settings.GetDateTime(
+                                            EastFive.Web.AppSettings.TokenForceRefreshTime,
+                                        (notValidBeforeTime) =>
+                                        {
+                                            if (validatedToken.ValidFrom < notValidBeforeTime)
+                                                return EastFive.Web.Configuration.Settings.GetString(
+                                                        EastFive.Web.AppSettings.TokenForceRefreshMessage,
+                                                    (message) => invalidToken(message),
+                                                    (why) => invalidToken(why));
+                                            return success(claims);
+                                        },
+                                        (why) => success(claims));
                                 }
                                 catch (ArgumentException ex)
                                 {
@@ -197,24 +203,26 @@ namespace EastFive.Security.Tokens
                             try
                             {
                                 var handler = new JwtSecurityTokenHandler();
-                                var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
-                                    out SecurityToken validatedToken);
+                                var principal = handler.ReadJwtToken(jwtEncodedString);
+                                //var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
+                                //    out SecurityToken validatedToken);
 
                                 // TODO: Check if token is still valid at current date / time?
                                 var claims = principal.Claims.ToArray();
+                                return success(claims);
 
-                                return EastFive.Web.Configuration.Settings.GetDateTime(
-                                        EastFive.Web.AppSettings.TokenForceRefreshTime,
-                                    (notValidBeforeTime) =>
-                                    {
-                                        if (validatedToken.ValidFrom < notValidBeforeTime)
-                                            return EastFive.Web.Configuration.Settings.GetString(
-                                                    EastFive.Web.AppSettings.TokenForceRefreshMessage,
-                                                (message) => invalidToken(message),
-                                                (why) => invalidToken(why));
-                                        return success(claims);
-                                    },
-                                    (why) => success(claims));
+                                //return EastFive.Web.Configuration.Settings.GetDateTime(
+                                //        EastFive.Web.AppSettings.TokenForceRefreshTime,
+                                //    (notValidBeforeTime) =>
+                                //    {
+                                //        if (validatedToken.ValidFrom < notValidBeforeTime)
+                                //            return EastFive.Web.Configuration.Settings.GetString(
+                                //                    EastFive.Web.AppSettings.TokenForceRefreshMessage,
+                                //                (message) => invalidToken(message),
+                                //                (why) => invalidToken(why));
+                                //        return success(claims);
+                                //    },
+                                //    (why) => success(claims));
                             }
                             catch (ArgumentException ex)
                             {
