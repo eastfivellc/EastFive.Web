@@ -50,6 +50,7 @@ namespace EastFive.Security.Tokens
                                 var dontValidateToken = EastFive.Security.AppSettings.TokensAllValid.ConfigurationBoolean(
                                     v => v,
                                     onNotSpecified: () => false);
+
                                 try
                                 {
                                     if (dontValidateToken)
