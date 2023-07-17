@@ -45,14 +45,13 @@ namespace EastFive.Security.Tokens
                                     RequireExpirationTime = true,
                                 };
 
+                                var handler = new JwtSecurityTokenHandler();
+
+                                var dontValidateToken = EastFive.Security.AppSettings.TokensAllValid.ConfigurationBoolean(
+                                    v => v,
+                                    onNotSpecified: () => false);
                                 try
                                 {
-                                    var handler = new JwtSecurityTokenHandler();
-
-                                    var dontValidateToken = EastFive.Security.AppSettings.TokensAllValid.ConfigurationBoolean(
-                                        v => v,
-                                        onNotSpecified: () => false);
-
                                     if (dontValidateToken)
                                     {
                                         var jwtToken = handler.ReadJwtToken(jwtEncodedString);
