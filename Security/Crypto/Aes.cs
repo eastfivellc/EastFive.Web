@@ -6,39 +6,64 @@ namespace EastFive.Security.Crypto
 {
 	public static class Aes
 	{
-		public static byte[] AesEncrypt(this byte[] dataToEncrypt, System.Security.Cryptography.Aes provider)
-		{
-			var encryptor = provider.CreateEncryptor();
-            using (var ms = new MemoryStream())
-            using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-            using (var sw = new StreamWriter(cs))
+        public static TResult GenerateGuidKey<TResult>(
+            Func<Guid, // key
+                TResult> onSuccess)
+        {
+            using (var provider = System.Security.Cryptography.Aes.Create())
             {
-                sw.Write(dataToEncrypt);
-                sw.Close();
-                return ms.ToArray();
+                provider.KeySize = 128; // other key sizes won't fit in a GUID
+                return onSuccess(
+                    new Guid(provider.Key)); 
             }
         }
 
-        public static byte[] AesDecrypt(this byte[] dataToDecrypt, System.Security.Cryptography.Aes provider)
+        public static Guid AesEncrypt(this Guid dataToEncrypt, Guid secretAseKey)
         {
-            var decryptor = provider.CreateDecryptor();
-            using (var ms = new MemoryStream(dataToDecrypt))
-            using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+            using (var aes = System.Security.Cryptography.Aes.Create())
             {
-                return ms.ToArray();
+                aes.Mode = CipherMode.ECB;
+                aes.Padding = PaddingMode.None;
+                aes.Key = secretAseKey.ToByteArray();
+
+                using (var e = aes.CreateEncryptor())
+                using (var ms = new MemoryStream())
+                {
+                    using (var cs = new CryptoStream(ms, e, CryptoStreamMode.Write))
+                    {
+                        cs.Write(dataToEncrypt.ToByteArray(), 0, 16);
+                    }
+                    return new Guid(ms.ToArray());
+                }
             }
         }
 
-        public static Guid AesEncrypt(this Guid dataToEncrypt, System.Security.Cryptography.Aes provider)
+        public static Guid AesDecrypt(this Guid dataToDecrypt, Guid secretAseKey)
         {
-            var result = AesEncrypt(dataToEncrypt.ToByteArray(), provider);
-            return new Guid(result);
-        }
+            using (var aes = System.Security.Cryptography.Aes.Create())
+            {
+                aes.Mode = CipherMode.ECB;
+                aes.Padding = PaddingMode.None;
+                aes.Key = secretAseKey.ToByteArray();
 
-        public static Guid AesDecrypt(this Guid dataToDecrypt, System.Security.Cryptography.Aes provider)
-        {
-            var result = AesDecrypt(dataToDecrypt.ToByteArray(), provider);
-            return new Guid(result);
+                using (var d = aes.CreateDecryptor())
+                using (var ms = new MemoryStream(dataToDecrypt.ToByteArray()))
+                using (var cs = new CryptoStream(ms, d, CryptoStreamMode.Read))
+                {
+                    var bytes = Guid.Empty.ToByteArray();
+
+                    // using .NET 6 approach recommended here: https://github.com/dotnet/runtime/issues/61398
+                    int num = 0;
+                    while (num < bytes.Length)
+                    {
+                        int bytesRead = cs.Read(bytes, num, bytes.Length - num);
+                        if (bytesRead == 0)
+                            break;
+                        num += bytesRead;
+                    }
+                    return new Guid(bytes);
+                }
+            }
         }
     }
 }
