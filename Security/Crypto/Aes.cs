@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -22,8 +22,11 @@ namespace EastFive.Security.Crypto
         {
             using (var aes = System.Security.Cryptography.Aes.Create())
             {
+		        #pragma warning disable SCS0013 // Potential usage of weak CipherMode
                 aes.Mode = CipherMode.ECB;
-                aes.Padding = PaddingMode.None;
+		        #pragma warning restore SCS0013 // Potential usage of weak CipherMode
+                
+		        aes.Padding = PaddingMode.None;
                 aes.Key = secretAseKey.ToByteArray();
 
                 using (var e = aes.CreateEncryptor())
@@ -42,7 +45,10 @@ namespace EastFive.Security.Crypto
         {
             using (var aes = System.Security.Cryptography.Aes.Create())
             {
+		        #pragma warning disable SCS0013 // Potential usage of weak CipherMode
                 aes.Mode = CipherMode.ECB;
+		        #pragma warning restore SCS0013 // Potential usage of weak CipherMode
+
                 aes.Padding = PaddingMode.None;
                 aes.Key = secretAseKey.ToByteArray();
 
