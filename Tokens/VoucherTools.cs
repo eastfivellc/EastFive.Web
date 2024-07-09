@@ -203,7 +203,7 @@ namespace EastFive.Security
                 {
                     if (accessToken == tokenCorrect)
                         return success(authId);
-                    return invalidToken("Signature is incorrect.");
+                    return invalidSignature("Signature is incorrect.");
                 },
                 missingConfigurationSetting,
                 invalidConfigurationSetting);
