@@ -62,9 +62,7 @@ namespace EastFive.Security.Tokens
                                     var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
                                         out SecurityToken validatedToken);
 
-                                    // TODO: Check if token is still valid at current date / time?
                                     var claims = principal.Claims.ToArray();
-
                                     return EastFive.Web.Configuration.Settings.GetDateTime(
                                             EastFive.Web.AppSettings.TokenForceRefreshTime,
                                         (notValidBeforeTime) =>
@@ -116,27 +114,24 @@ namespace EastFive.Security.Tokens
             return RSA.RSAFromConfig(configNameOfRSAKey,
                 (rsaProvider) =>
                 {
-                    //using (rsaProvider)
-                    //{
-                        return configNameOfIssuer.ConfigurationString(
-                            issuer =>
-                            {
-                                if (string.IsNullOrWhiteSpace(issuer))
-                                    return missingConfigurationSetting(configNameOfIssuer);
-                                var algorithm = configNameOfRSAAlgorithm.ConfigurationString(
-                                    algorithm =>
-                                    {
-                                        if (string.IsNullOrWhiteSpace(algorithm))
-                                            return Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature;
-                                        return algorithm;
-                                    },
-                                    why => Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature);
-                                var jwt = rsaProvider.JwtToken(issuer, scope, claims,
-                                            issued, duration, algorithm, tokenHeaders);
-                                return tokenCreated(jwt);
-                            },
+                    return configNameOfIssuer.ConfigurationString(
+                        issuer =>
+                        {
+                            if (string.IsNullOrWhiteSpace(issuer))
+                                return missingConfigurationSetting(configNameOfIssuer);
+                            var algorithm = configNameOfRSAAlgorithm.ConfigurationString(
+                                algorithm =>
+                                {
+                                    if (string.IsNullOrWhiteSpace(algorithm))
+                                        return Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature;
+                                    return algorithm;
+                                },
+                                why => Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256Signature);
+                            var jwt = rsaProvider.JwtToken(issuer, scope, claims,
+                                        issued, duration, algorithm, tokenHeaders);
+                            return tokenCreated(jwt);
+                        },
                             (why) => missingConfigurationSetting(configNameOfIssuer));
-                    //}
                 },
                 () => missingConfigurationSetting("missing"),
                 (issue) => invalidConfigurationSetting(
@@ -185,7 +180,6 @@ namespace EastFive.Security.Tokens
             var result = configNameOfRsaKeyToValidateAgainst.RSAFromConfig(
                 rsaProvider =>
                 {
-                    //using(rsaProvider)
                     return configNameOfIssuerToValidateAgainst.ConfigurationString(
                         (issuer) =>
                         {
@@ -203,11 +197,10 @@ namespace EastFive.Security.Tokens
                             try
                             {
                                 var handler = new JwtSecurityTokenHandler();
-                                var principal = handler.ReadJwtToken(jwtEncodedString);
-                                //var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
-                                //    out SecurityToken validatedToken);
+                                //var principal = handler.ReadJwtToken(jwtEncodedString);
+                                var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
+                                    out SecurityToken validatedToken);
 
-                                // TODO: Check if token is still valid at current date / time?
                                 var claims = principal.Claims.ToArray();
                                 return success(claims);
 
