@@ -1,4 +1,5 @@
-﻿using EastFive.Extensions;
+﻿using EastFive.Configuration;
+using EastFive.Extensions;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,22 @@ namespace EastFive.Web.Configuration
             if (!onUnspecified.IsDefault())
                 return onUnspecified(msg);
             throw new ConfigurationException(key, typeof(string), msg);
+        }
+
+        public static TResult ConfigurationString<TResult>(this IProvideConfigurationKey key,
+            Func<string, TResult> onFound,
+            Func<string, TResult> onUnspecified = default)
+        {
+            if (key.IsDefaultOrNull())
+                throw new ArgumentException("Configuration Key is null");
+            var value = configuration[key.Key];
+            if (!value.IsDefaultOrNull())
+                return onFound(value);
+
+            var msg = $" - The configuration value for [{key}] is not specified. Please specify a string value";
+            if (!onUnspecified.IsDefault())
+                return onUnspecified(msg);
+            throw new ConfigurationException(key.Key, typeof(string), msg);
         }
 
         private static TResult ConfigurationBase<TBase, TResult>(string key,
