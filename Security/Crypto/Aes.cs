@@ -97,6 +97,8 @@ namespace EastFive.Security.Crypto
                     if (bytesRead == 0)
                         break;
                     num += bytesRead;
+                    if (num > output.Length)
+                        num = output.Length;
                 }
                 var trimmed = new byte[num];
                 Array.Copy(output, trimmed, num);
