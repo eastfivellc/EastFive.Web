@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Globalization;
-using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -31,16 +31,6 @@ namespace EastFive.Security.Crypto
             return Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(text);
             //var bytes = System.Web.HttpServerUtility.UrlTokenDecode(text);
             //return Encoding.UTF8.GetString(bytes);
-        }
-
-        public static SecurityToken GetRsaSecurityToken(string base64EncodedValue)
-        {
-            var xml = UrlBase64Decode(base64EncodedValue);
-            using (var rsa = new RSACryptoServiceProvider())
-            {
-                rsa.FromXmlString(xml);
-                return new RsaSecurityToken(rsa);
-            }
         }
 
         public delegate T GenerateHashDelegate<T>(string salt, string hash);
