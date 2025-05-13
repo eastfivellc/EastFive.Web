@@ -24,28 +24,34 @@ public static class ECDSA
         }
     }
 
-    public static TResult FromConfig<TResult>(string keyConfigurationName,
+    public static TResult FromPrivateKey<TResult>(byte[] privateKey,
+        Func<System.Security.Cryptography.ECDsa, 
+            string, // alg
+            TResult> onSuccess,
+        Func<string, TResult> onFailure)
+    {
+        try
+        {
+            var ecdsa = ECDsa.Create();
+            ecdsa.ImportECPrivateKey(privateKey, out int bytesRead);
+            var alg = $"ES{ecdsa.KeySize}";
+            return onSuccess(ecdsa, alg);
+        }
+        catch (Exception ex)
+        {
+            return onFailure(ex.Message);
+        }
+    }
+
+    public static TResult FromConfig<TResult>(string privateKeyConfigurationName,
         Func<System.Security.Cryptography.ECDsa, 
             string, // alg
             TResult> onSuccess,
         Func<TResult> onNotSpecified,
         Func<string, TResult> onFailure)
     {
-        return keyConfigurationName.ConfigurationBase64Bytes(
-            (keyBytes) => 
-            {
-                try
-                {
-                    var ecdsa = ECDsa.Create();
-                    ecdsa.ImportECPrivateKey(keyBytes, out int bytesRead);
-                    var alg = $"ES{ecdsa.KeySize}";
-                    return onSuccess(ecdsa, alg);
-                }
-                catch (Exception ex)
-                {
-                    return onFailure(ex.Message);
-                }
-            },
+        return privateKeyConfigurationName.ConfigurationBase64Bytes(
+            (keyBytes) => FromPrivateKey(keyBytes, onSuccess, onFailure),               
             onFailure,
             onNotSpecified);
     }
