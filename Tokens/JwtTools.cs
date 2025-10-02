@@ -192,6 +192,26 @@ namespace EastFive.Security.Tokens
                                 ValidIssuer = issuer,
                                 IssuerSigningKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider),
                                 RequireExpirationTime = true,
+                                // TryAllIssuerSigningKeys = true,
+                                IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+                                {
+                                    // If the token has a key identifier (kid) in its header, you can use it to
+                                    // look up the signing key. This example assumes you have a method
+                                    // GetSigningKeysForKeyId that retrieves the appropriate keys.
+                                    // if (!string.IsNullOrEmpty(kid))
+                                    // {
+                                    //     var keys = new List<SecurityKey>();
+                                    //     var key = validationParameters.IssuerSigningKey;
+                                    //     if (key is RsaSecurityKey rsaKey && rsaKey.KeyId == kid)
+                                    //     {
+                                    //         keys.Add(key);
+                                    //     }
+                                    //     return keys;
+                                    // }
+
+                                    // If no kid is present, return all possible signing keys.
+                                    return new List<SecurityKey> { validationParameters.IssuerSigningKey };
+                                },
                             };
 
                             try
@@ -326,7 +346,7 @@ namespace EastFive.Security.Tokens
             string issuer, Uri scope,
             IEnumerable<Claim> claims,
             DateTime issued, TimeSpan duration,
-            string algorithm, 
+            string algorithm,
             IEnumerable<KeyValuePair<string, string>> tokenHeaders = default)
         {
             var securityKey = new Microsoft.IdentityModel.Tokens.RsaSecurityKey(rsaProvider);
@@ -335,13 +355,32 @@ namespace EastFive.Security.Tokens
                 securityKey, algorithm);
             var expires = (issued + duration);
             var token = new JwtSecurityToken(issuer, scope.AbsoluteUri, claims, issued, expires, signature);
+
+            var keyId = GetSecurityKeyId();
+            token.Header.Add(JwtHeaderParameterNames.Kid, keyId);
+
             foreach (var kvp in tokenHeaders.NullToEmpty())
                 token.Header.Add(kvp.Key, kvp.Value);
 
             var handler = new JwtSecurityTokenHandler();
             var jwt = handler.WriteToken(token);
             return jwt;
+
+            // Generate a stable key identifier from the RSA parameters
+            string GetSecurityKeyId()
+            {
+                if (securityKey.KeyId.HasBlackSpace())
+                    return securityKey.KeyId;
+                    
+                // Create a hash of the RSA parameters to use as a key ID
+                var parameters = rsaProvider.ExportParameters(false);
+                using var sha256 = System.Security.Cryptography.SHA256.Create();
+                var hash = sha256.ComputeHash(parameters.Modulus);
+                return Convert.ToBase64String(hash)[..16]; // Use first 16 chars
+            }
         }
+        
+        
 
         public static TResult CreateToken<TResult>(Uri scope,
             DateTime issued, TimeSpan duration,
