@@ -356,12 +356,15 @@ namespace EastFive.Security.Tokens
             var expires = (issued + duration);
             var token = new JwtSecurityToken(issuer, scope.AbsoluteUri, claims, issued, expires, signature);
 
-            var keyId = GetSecurityKeyId();
-            token.Header.Add(JwtHeaderParameterNames.Kid, keyId);
-
             foreach (var kvp in tokenHeaders.NullToEmpty())
                 token.Header.Add(kvp.Key, kvp.Value);
 
+            if (!token.Header.ContainsKey(JwtHeaderParameterNames.Kid))
+            {
+                var keyId = GetSecurityKeyId();
+                token.Header.Add(JwtHeaderParameterNames.Kid, keyId);
+            }
+            
             var handler = new JwtSecurityTokenHandler();
             var jwt = handler.WriteToken(token);
             return jwt;
