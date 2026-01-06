@@ -131,7 +131,7 @@ namespace EastFive.Security
             }
             catch (Exception ex)
             {
-                invalidToken(ex.Message);
+                return invalidToken(ex.Message);
             }
             #endregion
 
@@ -191,7 +191,7 @@ namespace EastFive.Security
             }
             catch (Exception ex)
             {
-                invalidToken(ex.Message);
+                return invalidToken(ex.Message);
             }
             #endregion
 
