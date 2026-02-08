@@ -54,6 +54,34 @@ namespace EastFive.Web
             }
         }
 
+        public static TResult GetUnvalidatedClaimsJwtString<TResult>(this string jwtString,
+            Func<IEnumerable<Claim>, TResult> success,
+            Func<string, TResult> onFailure)
+        {
+            try
+            {
+                var jwtStringPossibleBearer = jwtString;
+                var securityClientJwtString = jwtStringPossibleBearer.ToLower().StartsWith(BearerTokenPrefix) ?
+                    jwtStringPossibleBearer.Substring(BearerTokenPrefix.Length) :
+                    jwtStringPossibleBearer;
+                return securityClientJwtString.ParseJwtString(
+                    (token) =>
+                    {
+                        var claims = token.Claims.ToArray();
+                        return success(claims);
+                    },
+                    (why) =>
+                    {
+                        return onFailure(why);
+                    });
+            }
+            catch (Exception ex)
+            {
+                //throw new ArgumentException("Problem getting user id from Authorization header");
+                return onFailure(ex.Message);
+            }
+        }
+
         public static TResult ParseJwtString<TResult>(this string jwtString,
             Func<System.IdentityModel.Tokens.Jwt.JwtSecurityToken, TResult> onSuccess,
             Func<string, TResult> failure)
