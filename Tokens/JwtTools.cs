@@ -59,6 +59,13 @@ namespace EastFive.Security.Tokens
                                         return success(jwtToken.Claims.ToArray());
                                     }
 
+                                    if (handler.CanReadToken(jwtEncodedString))
+                                    {
+                                        var jwtToken = handler.ReadJwtToken(jwtEncodedString);
+                                        if (IsTokenExpired(jwtToken, validationParameters.ClockSkew))
+                                            return invalidToken("Token is expired.");
+                                    }
+
                                     var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
                                         out SecurityToken validatedToken);
 
@@ -217,6 +224,13 @@ namespace EastFive.Security.Tokens
                             try
                             {
                                 var handler = new JwtSecurityTokenHandler();
+                                if (handler.CanReadToken(jwtEncodedString))
+                                {
+                                    var jwtToken = handler.ReadJwtToken(jwtEncodedString);
+                                    if (IsTokenExpired(jwtToken, validationParameters.ClockSkew))
+                                        return invalidToken("Token is expired.");
+                                }
+
                                 //var principal = handler.ReadJwtToken(jwtEncodedString);
                                 var principal = handler.ValidateToken(jwtEncodedString, validationParameters,
                                     out SecurityToken validatedToken);
@@ -439,6 +453,15 @@ namespace EastFive.Security.Tokens
         private static bool DoesEqual(this string strA, string strB, bool ignoreCase = false)
         {
             return String.Compare(strA, strB, ignoreCase) == 0;
+        }
+
+        private static bool IsTokenExpired(JwtSecurityToken jwtToken, TimeSpan clockSkew)
+        {
+            if (jwtToken.ValidTo == DateTime.MinValue)
+                return false;
+
+            var expiresBefore = DateTime.UtcNow.Subtract(clockSkew);
+            return jwtToken.ValidTo < expiresBefore;
         }
 
     }
